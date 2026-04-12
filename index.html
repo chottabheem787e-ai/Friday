@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="theme-color" content="#0f0f1a"/>
+<title>FRIDAY AI</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0f0f1a;--bg2:#1a1a2e;--bg3:#16213e;
+  --purple:#534AB7;--purple2:#7F77DD;--purple3:#CECBF6;
+  --teal:#1D9E75;--teal2:#5DCAA5;
+  --pink:#D4537E;--pink2:#ED93B1;
+  --text:#e8e8ff;--text2:#9999bb;--text3:#6666aa;
+  --border:rgba(83,74,183,0.3);
+  --card:#1a1a2e;
+  --radius:12px;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+.screen{display:none;flex-direction:column;height:100vh;max-width:480px;margin:0 auto}
+.screen.active{display:flex}
+
+/* HEADER */
+.hdr{background:var(--bg2);padding:14px 16px 10px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.hdr-title{font-size:18px;font-weight:600;color:var(--purple3);letter-spacing:2px;flex:1}
+.hdr-sub{font-size:11px;color:var(--text3)}
+.status-dot{width:8px;height:8px;border-radius:50%;background:#444;flex-shrink:0}
+.status-dot.on{background:var(--teal);box-shadow:0 0 6px var(--teal)}
+.status-dot.listen{background:var(--purple2);box-shadow:0 0 8px var(--purple2)}
+.status-dot.speak{background:var(--pink);box-shadow:0 0 8px var(--pink)}
+
+/* ORB */
+.orb-area{display:flex;flex-direction:column;align-items:center;padding:20px 0 14px;flex-shrink:0;background:var(--bg)}
+.orb{width:88px;height:88px;border-radius:50%;background:var(--bg2);border:2px solid var(--purple);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform 0.15s,border-color 0.2s,box-shadow 0.2s;user-select:none}
+.orb:active{transform:scale(0.93)}
+.orb.listening{border-color:var(--purple2);box-shadow:0 0 0 10px rgba(127,119,221,0.12),0 0 0 20px rgba(127,119,221,0.06)}
+.orb.speaking{border-color:var(--pink);box-shadow:0 0 0 10px rgba(212,83,126,0.12)}
+.orb svg{width:34px;height:34px}
+.orb-label{margin-top:10px;font-size:12px;color:var(--text2);text-align:center}
+
+/* TABS */
+.tabs{display:flex;background:var(--bg2);border-bottom:0.5px solid var(--border);flex-shrink:0}
+.tab{flex:1;padding:10px 4px;text-align:center;font-size:12px;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s}
+.tab.active{color:var(--purple3);border-bottom-color:var(--purple);font-weight:600}
+
+/* PANES */
+.pane{display:none;flex:1;overflow-y:auto;padding:10px;flex-direction:column;gap:8px;background:var(--bg)}
+.pane.active{display:flex}
+
+/* CHAT */
+.chat-scroll{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px;background:var(--bg)}
+.bubble{padding:10px 14px;border-radius:14px;max-width:82%;font-size:14px;line-height:1.5;word-break:break-word}
+.bubble.user{background:var(--purple);color:#d8d4ff;align-self:flex-end;border-bottom-right-radius:4px}
+.bubble.fri{background:var(--bg2);color:var(--text);align-self:flex-start;border:0.5px solid var(--border);border-bottom-left-radius:4px}
+.bubble.fri.thinking{color:var(--text3);font-style:italic}
+
+/* CONTACTS */
+.cc{background:var(--card);border:0.5px solid var(--border);border-radius:var(--radius);padding:12px;display:flex;align-items:center;gap:12px}
+.avi{width:42px;height:42px;border-radius:50%;background:#26215C;color:var(--purple3);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0}
+.ci{flex:1;min-width:0}
+.cn{font-size:14px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cr{font-size:11px;color:var(--text3)}
+.cbtns{display:flex;gap:6px;flex-shrink:0}
+.cbtn{width:34px;height:34px;border-radius:50%;border:0.5px solid var(--border);background:var(--bg);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px}
+.cbtn:active{background:var(--bg2)}
+.add-form{background:var(--card);border:0.5px solid var(--border);border-radius:var(--radius);padding:12px;display:flex;flex-direction:column;gap:8px}
+.add-form input{width:100%;padding:9px 12px;border-radius:8px;border:0.5px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;outline:none}
+.add-form input:focus{border-color:var(--purple2)}
+.add-form input::placeholder{color:var(--text3)}
+.btn-add{background:var(--purple);color:#d0ccff;border:none;border-radius:8px;padding:9px;font-size:13px;font-weight:500;cursor:pointer;width:100%}
+.btn-add:active{background:#3C3489}
+.section-label{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:1px;text-transform:uppercase;padding:4px 0}
+
+/* COMMANDS */
+.cmd-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cmd{background:var(--card);border:0.5px solid var(--border);border-radius:10px;padding:10px 12px;cursor:pointer}
+.cmd:active{background:var(--bg2)}
+.cmd-title{font-size:13px;font-weight:500;color:var(--purple3);margin-bottom:2px}
+.cmd-ex{font-size:11px;color:var(--text3)}
+.info-card{background:var(--card);border:0.5px solid var(--border);border-radius:var(--radius);padding:12px;font-size:12px;color:var(--text2);line-height:1.7}
+.info-card b{color:var(--purple3);font-weight:500}
+
+/* SETUP SCREEN */
+.setup{flex:1;overflow-y:auto;padding:20px 16px;display:flex;flex-direction:column;gap:14px;background:var(--bg)}
+.setup h2{font-size:20px;font-weight:600;color:var(--purple3);text-align:center}
+.setup p{font-size:13px;color:var(--text2);text-align:center;line-height:1.6}
+.setup-field{display:flex;flex-direction:column;gap:5px}
+.setup-field label{font-size:12px;color:var(--text3);font-weight:500}
+.setup-field input{width:100%;padding:10px 12px;border-radius:8px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text);font-size:13px;outline:none}
+.setup-field input:focus{border-color:var(--purple2)}
+.setup-field input::placeholder{color:var(--text3)}
+.btn-setup{background:var(--purple);color:#d0ccff;border:none;border-radius:10px;padding:13px;font-size:15px;font-weight:600;cursor:pointer;width:100%;margin-top:4px}
+.btn-setup:active{background:#3C3489}
+.setup-note{font-size:11px;color:var(--text3);text-align:center;line-height:1.6}
+.setup-note a{color:var(--purple2)}
+.divider{border:none;border-top:0.5px solid var(--border);margin:4px 0}
+</style>
+</head>
+<body>
+
+<!-- SETUP SCREEN -->
+<div class="screen active" id="screen-setup" style="display:flex;flex-direction:column;height:100vh;max-width:480px;margin:0 auto">
+  <div class="hdr">
+    <div>
+      <div class="hdr-title">F.R.I.D.A.Y</div>
+      <div class="hdr-sub">Android AI Assistant — First Time Setup</div>
+    </div>
+  </div>
+  <div class="setup">
+    <h2>Welcome to FRIDAY</h2>
+    <p>Your personal AI assistant. Set up once and it works forever — even offline for calls and apps.</p>
+    <div class="setup-field">
+      <label>Your Name (FRIDAY calls you this)</label>
+      <input id="s-name" placeholder="e.g. Zoya" />
+    </div>
+    <div class="setup-field">
+      <label>Your City (for weather)</label>
+      <input id="s-city" placeholder="e.g. Chennai" />
+    </div>
+    <div class="setup-field">
+      <label>Groq API Key (FREE — for AI brain)</label>
+      <input id="s-groq" placeholder="gsk_xxxxxxxxxxxxxxxxxxxx" />
+    </div>
+    <div class="setup-field">
+      <label>OpenWeather API Key (FREE)</label>
+      <input id="s-weather" placeholder="8c6770c6ca13eeb5..." />
+    </div>
+    <div class="setup-field">
+      <label>NewsAPI Key (FREE)</label>
+      <input id="s-news" placeholder="520e119e42d179d2..." />
+    </div>
+    <button class="btn-setup" onclick="saveSetup()">Save &amp; Start FRIDAY</button>
+    <hr class="divider"/>
+    <div class="setup-note">
+      Groq FREE key: <a href="https://console.groq.com" target="_blank">console.groq.com</a><br/>
+      Weather FREE key: <a href="https://openweathermap.org/api" target="_blank">openweathermap.org</a><br/>
+      News FREE key: <a href="https://newsapi.org" target="_blank">newsapi.org</a><br/>
+      You can skip API keys — voice commands for calls, YouTube, WhatsApp still work without them.
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP SCREEN -->
+<div class="screen" id="screen-main">
+  <div class="hdr">
+    <div style="flex:1">
+      <div class="hdr-title">F.R.I.D.A.Y</div>
+      <div class="hdr-sub" id="hdr-greeting">Hello, Boss</div>
+    </div>
+    <div class="status-dot" id="sdot"></div>
+  </div>
+
+  <div class="orb-area">
+    <div class="orb" id="orb" ontouchstart="orbTouch(event)" onclick="orbClick()">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z" fill="#7F77DD"/>
+        <path d="M19 10a7 7 0 0 1-14 0" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M12 17v4" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M9 21h6" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="orb-label" id="orb-label">Tap to speak</div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" id="tab-chat-btn" onclick="switchTab('chat')">Chat</div>
+    <div class="tab" id="tab-contacts-btn" onclick="switchTab('contacts')">Contacts</div>
+    <div class="tab" id="tab-commands-btn" onclick="switchTab('commands')">Commands</div>
+    <div class="tab" id="tab-settings-btn" onclick="switchTab('settings')">Settings</div>
+  </div>
+
+  <!-- CHAT -->
+  <div class="pane active chat-scroll" id="pane-chat">
+    <div class="bubble fri">Hi! I'm FRIDAY. Tap the orb and speak — I understand English and Tamil.</div>
+  </div>
+
+  <!-- CONTACTS -->
+  <div class="pane" id="pane-contacts">
+    <div class="section-label">Your Contacts</div>
+    <div id="contact-list"></div>
+    <div class="section-label" style="margin-top:8px">Add Contact</div>
+    <div class="add-form">
+      <input id="c-name" placeholder="Name (e.g. Amma)" />
+      <input id="c-phone" placeholder="Phone (e.g. +919876543210)" />
+      <input id="c-rel" placeholder="Relation (e.g. Mom, Friend, Dad)" />
+      <button class="btn-add" onclick="addContact()">Add Contact</button>
+    </div>
+  </div>
+
+  <!-- COMMANDS -->
+  <div class="pane" id="pane-commands">
+    <div class="cmd-grid">
+      <div class="cmd" onclick="tryCmd('Call Amma')"><div class="cmd-title">Call</div><div class="cmd-ex">"Call [name]"</div></div>
+      <div class="cmd" onclick="tryCmd('WhatsApp Dad')"><div class="cmd-title">WhatsApp</div><div class="cmd-ex">"WhatsApp [name]"</div></div>
+      <div class="cmd" onclick="tryCmd('Play Arjit Singh on YouTube')"><div class="cmd-title">Play YouTube</div><div class="cmd-ex">"Play [song]"</div></div>
+      <div class="cmd" onclick="tryCmd('Search Python tutorial on Google')"><div class="cmd-title">Google</div><div class="cmd-ex">"Search [topic]"</div></div>
+      <div class="cmd" onclick="tryCmd('Open Instagram')"><div class="cmd-title">Open App</div><div class="cmd-ex">"Open [app name]"</div></div>
+      <div class="cmd" onclick="tryCmd('Search phones on Amazon')"><div class="cmd-title">Amazon</div><div class="cmd-ex">"Search [item] on Amazon"</div></div>
+      <div class="cmd" onclick="tryCmd('What is the weather in Chennai')"><div class="cmd-title">Weather</div><div class="cmd-ex">"Weather in [city]"</div></div>
+      <div class="cmd" onclick="tryCmd('Latest news')"><div class="cmd-title">News</div><div class="cmd-ex">"Latest news"</div></div>
+      <div class="cmd" onclick="tryCmd('What time is it')"><div class="cmd-title">Time</div><div class="cmd-ex">"What time is it"</div></div>
+      <div class="cmd" onclick="tryCmd('Battery level')"><div class="cmd-title">Battery</div><div class="cmd-ex">"Battery level"</div></div>
+      <div class="cmd" onclick="tryCmd('Search Flipkart phones')"><div class="cmd-title">Flipkart</div><div class="cmd-ex">"Search [item] on Flipkart"</div></div>
+      <div class="cmd" onclick="tryCmd('Open Maps')"><div class="cmd-title">Maps</div><div class="cmd-ex">"Open Maps"</div></div>
+    </div>
+    <div class="info-card" style="margin-top:8px">
+      <b>Tamil support:</b> Speak in Tamil — FRIDAY replies in Tamil too.<br/>
+      <b>Tip:</b> All commands above work by tapping the orb and speaking naturally.
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="pane" id="pane-settings">
+    <div class="section-label">Configuration</div>
+    <div class="add-form">
+      <input id="set-name" placeholder="Your name" />
+      <input id="set-city" placeholder="Your city" />
+      <input id="set-groq" placeholder="Groq API key" />
+      <input id="set-weather" placeholder="OpenWeather API key" />
+      <input id="set-news" placeholder="NewsAPI key" />
+      <button class="btn-add" onclick="saveSettings()">Save Settings</button>
+    </div>
+    <div class="info-card" style="margin-top:8px">
+      <b>How to install as Android app:</b><br/>
+      1. Open this HTML file in <b>Chrome</b> on your Android<br/>
+      2. Tap the 3-dot menu (⋮) in Chrome<br/>
+      3. Tap <b>"Add to Home Screen"</b><br/>
+      4. Tap Add — FRIDAY icon appears on your home screen!<br/><br/>
+      <b>For voice to work:</b> Chrome will ask for microphone permission — tap Allow.
+    </div>
+  </div>
+</div>
+
+<script>
+const CFG = {
+  name:'Boss', city:'Chennai',
+  groq_key:'', weather_key:'', news_key:'',
+  voices_loaded:false
+};
+
+function loadCFG(){
+  try{
+    const s = localStorage.getItem('friday_cfg');
+    if(s){const d=JSON.parse(s);Object.assign(CFG,d);}
+  }catch(e){}
+}
+
+function saveCFG(){
+  try{localStorage.setItem('friday_cfg',JSON.stringify(CFG));}catch(e){}
+}
+
+function saveSetup(){
+  const n=document.getElementById('s-name').value.trim();
+  const c=document.getElementById('s-city').value.trim();
+  const g=document.getElementById('s-groq').value.trim();
+  const w=document.getElementById('s-weather').value.trim();
+  const nk=document.getElementById('s-news').value.trim();
+  if(n) CFG.name=n;
+  if(c) CFG.city=c;
+  if(g) CFG.groq_key=g;
+  if(w) CFG.weather_key=w;
+  if(nk) CFG.news_key=nk;
+  saveCFG();
+  showMain();
+}
+
+function saveSettings(){
+  const n=document.getElementById('set-name').value.trim();
+  const c=document.getElementById('set-city').value.trim();
+  const g=document.getElementById('set-groq').value.trim();
+  const w=document.getElementById('set-weather').value.trim();
+  const nk=document.getElementById('set-news').value.trim();
+  if(n) CFG.name=n;
+  if(c) CFG.city=c;
+  if(g) CFG.groq_key=g;
+  if(w) CFG.weather_key=w;
+  if(nk) CFG.news_key=nk;
+  saveCFG();
+  addBubble('fri','Settings saved! Hello, '+CFG.name+'!');
+  speak('Settings saved. Hello '+CFG.name);
+}
+
+function showMain(){
+  document.getElementById('screen-setup').style.display='none';
+  const m=document.getElementById('screen-main');
+  m.classList.add('active');
+  m.style.display='flex';
+  document.getElementById('hdr-greeting').textContent='Hello, '+CFG.name;
+  loadSettingsFields();
+  renderContacts();
+  const h=new Date().getHours();
+  const g=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
+  const msg=g+', '+CFG.name+'! I am FRIDAY, your personal assistant. Tap the orb and speak.';
+  setTimeout(()=>{addBubble('fri',msg);speak(msg);},400);
+}
+
+function loadSettingsFields(){
+  document.getElementById('set-name').value=CFG.name||'';
+  document.getElementById('set-city').value=CFG.city||'';
+  document.getElementById('set-groq').value=CFG.groq_key||'';
+  document.getElementById('set-weather').value=CFG.weather_key||'';
+  document.getElementById('set-news').value=CFG.news_key||'';
+}
+
+// ── CONTACTS ──────────────────────────────────────────────────────────────
+let contacts = [];
+function loadContacts(){
+  try{const s=localStorage.getItem('friday_contacts');if(s)contacts=JSON.parse(s);}
+  catch(e){contacts=[];}
+  if(!contacts.length){
+    contacts=[{name:'Amma',phone:'',rel:'Mom'},{name:'Appa',phone:'',rel:'Dad'}];
+    saveContactsStore();
+  }
+}
+function saveContactsStore(){try{localStorage.setItem('friday_contacts',JSON.stringify(contacts));}catch(e){}}
+function initials(n){return n.split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2)||'??'}
+function renderContacts(){
+  const el=document.getElementById('contact-list');
+  if(!el) return;
+  el.innerHTML=contacts.map((c,i)=>`
+    <div class="cc">
+      <div class="avi">${initials(c.name)}</div>
+      <div class="ci"><div class="cn">${c.name}</div><div class="cr">${c.rel||'Contact'}${c.phone?' · '+c.phone:' · No number'}</div></div>
+      <div class="cbtns">
+        ${c.phone?`<div class="cbtn" onclick="directCall('${c.phone}')">📞</div>`:''}
+        ${c.phone?`<div class="cbtn" onclick="directWA('${c.phone}')">💬</div>`:''}
+        <div class="cbtn" onclick="delContact(${i})" style="font-size:13px">✕</div>
+      </div>
+    </div>`).join('');
+}
+function addContact(){
+  const n=document.getElementById('c-name').value.trim();
+  const p=document.getElementById('c-phone').value.trim();
+  const r=document.getElementById('c-rel').value.trim();
+  if(!n){return;}
+  contacts.push({name:n,phone:p,rel:r});
+  saveContactsStore();
+  renderContacts();
+  ['c-name','c-phone','c-rel'].forEach(id=>document.getElementById(id).value='');
+}
+function delContact(i){contacts.splice(i,1);saveContactsStore();renderContacts();}
+function directCall(p){window.location.href='tel:'+p;}
+function directWA(p){window.open('https://wa.me/'+p.replace(/\D/g,''));}
+function findContact(name){
+  const n=name.toLowerCase().trim();
+  return contacts.find(c=>c.name.toLowerCase()===n||c.rel.toLowerCase()===n||c.name.toLowerCase().includes(n));
+}
+
+// ── TABS ──────────────────────────────────────────────────────────────────
+function switchTab(t){
+  ['chat','contacts','commands','settings'].forEach(id=>{
+    document.getElementById('pane-'+id).classList.toggle('active',id===t);
+    document.getElementById('tab-'+id+'-btn').classList.toggle('active',id===t);
+  });
+  if(t==='contacts') renderContacts();
+  if(t==='settings') loadSettingsFields();
+}
+
+// ── CHAT BUBBLES ─────────────────────────────────────────────────────────
+function addBubble(who,text){
+  const pane=document.getElementById('pane-chat');
+  const d=document.createElement('div');
+  d.className='bubble '+who;
+  d.textContent=text;
+  pane.appendChild(d);
+  d.scrollIntoView({behavior:'smooth',block:'end'});
+  return d;
+}
+
+// ── VOICE OUTPUT ──────────────────────────────────────────────────────────
+let synth=window.speechSynthesis;
+let voicesReady=false;
+function loadVoices(){
+  if(synth){
+    const v=synth.getVoices();
+    if(v.length>0){voicesReady=true;}
+    else{synth.onvoiceschanged=()=>{voicesReady=true;};}
+  }
+}
+function speak(text){
+  if(!synth||!text) return;
+  synth.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  const isTamil=/[\u0B80-\u0BFF]/.test(text);
+  const voices=synth.getVoices();
+  if(isTamil){
+    const tv=voices.find(v=>/ta/i.test(v.lang));
+    if(tv){u.voice=tv;u.lang='ta-IN';}
+    else{u.lang='ta-IN';}
+  } else {
+    const iv=voices.find(v=>/en-IN|en_IN/i.test(v.lang))||voices.find(v=>/India/i.test(v.name));
+    if(iv){u.voice=iv;}
+    u.lang='en-IN';
+  }
+  u.rate=0.95;u.pitch=1.1;
+  setOrbState('speaking');
+  u.onend=()=>setOrbState('idle');
+  u.onerror=()=>setOrbState('idle');
+  synth.speak(u);
+}
+
+// ── ORB STATE ──────────────────────────────────────────────────────────────
+function setOrbState(s){
+  const orb=document.getElementById('orb');
+  const dot=document.getElementById('sdot');
+  const lbl=document.getElementById('orb-label');
+  orb.classList.remove('listening','speaking');
+  dot.classList.remove('on','listen','speak');
+  if(s==='listening'){orb.classList.add('listening');dot.classList.add('listen');lbl.textContent='Listening… speak now';}
+  else if(s==='speaking'){orb.classList.add('speaking');dot.classList.add('speak');lbl.textContent='Speaking…';}
+  else if(s==='thinking'){dot.classList.add('on');lbl.textContent='Thinking…';}
+  else{dot.classList.add('on');lbl.textContent='Tap to speak';}
+}
+
+// ── VOICE INPUT ────────────────────────────────────────────────────────────
+let recog=null;
+let isListening=false;
+
+function orbTouch(e){e.preventDefault();orbClick();}
+function orbClick(){
+  if(isListening){stopListen();return;}
+  startListen();
+}
+
+function startListen(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){
+    addBubble('fri','Voice not supported. Please use Chrome browser on Android.');
+    speak('Please open this in Chrome browser for voice to work.');
+    return;
+  }
+  switchTab('chat');
+  recog=new SR();
+  recog.lang='en-IN';
+  recog.continuous=false;
+  recog.interimResults=false;
+  recog.maxAlternatives=3;
+  recog.onstart=()=>{isListening=true;setOrbState('listening');};
+  recog.onresult=(e)=>{
+    isListening=false;
+    let text='';
+    for(let i=0;i<e.results[0].length;i++){
+      const t=e.results[0][i].transcript.trim();
+      if(t) text=t;
+      if(/[\u0B80-\u0BFF]/.test(t)){text=t;break;}
+    }
+    setOrbState('thinking');
+    handleCommand(text);
+  };
+  recog.onerror=(ev)=>{
+    isListening=false;setOrbState('idle');
+    if(ev.error==='not-allowed'){
+      addBubble('fri','Microphone blocked! Tap the lock icon in Chrome address bar → allow Microphone → refresh page.');
+      speak('Microphone access was denied. Please allow microphone in Chrome settings.');
+    } else if(ev.error==='no-speech'){
+      addBubble('fri','I did not hear anything. Please tap and try again.');
+    }
+  };
+  recog.onend=()=>{isListening=false;if(document.getElementById('orb').classList.contains('listening'))setOrbState('idle');};
+  try{recog.start();}
+  catch(e){isListening=false;setOrbState('idle');}
+}
+
+function stopListen(){if(recog){try{recog.stop();}catch(e){}recog=null;}isListening=false;setOrbState('idle');}
+
+// ── COMMAND HANDLER ────────────────────────────────────────────────────────
+async function handleCommand(text){
+  if(!text){setOrbState('idle');return;}
+  addBubble('user',text);
+  const t=text.toLowerCase().trim();
+
+  // EXIT / BYE
+  if(/^(bye|exit|quit|goodbye|stop friday)/.test(t)){
+    const r='Goodbye '+CFG.name+'! Have a great day!';
+    addBubble('fri',r);speak(r);setOrbState('idle');return;
+  }
+
+  // TIME / DATE
+  if(t.includes('time')||t.includes('date')||t.includes('day')){
+    const now=new Date();
+    const r='It is '+now.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})+', '+now.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    addBubble('fri',r);speak(r);setOrbState('idle');return;
+  }
+
+  // BATTERY
+  if(t.includes('battery')){
+    if(navigator.getBattery){
+      navigator.getBattery().then(b=>{
+        const pct=Math.round(b.level*100);
+        const r='Battery is at '+pct+' percent'+(b.charging?' and currently charging.':'.');
+        addBubble('fri',r);speak(r);
+      });
+    } else {
+      const r='Battery API is not available on this browser.';
+      addBubble('fri',r);speak(r);
+    }
+    setOrbState('idle');return;
+  }
+
+  // WEATHER
+  if(t.includes('weather')||t.includes('temperature')||t.includes('forecast')){
+    let city=CFG.city;
+    const m=t.match(/(?:in|at|for) ([a-z ]+)$/i);
+    if(m) city=m[1].trim().replace(/\b\w/g,c=>c.toUpperCase());
+    const r=await getWeather(city);
+    addBubble('fri',r);speak(r);setOrbState('idle');return;
+  }
+
+  // NEWS
+  if(t.includes('news')||t.includes('headlines')){
+    setOrbState('thinking');
+    const r=await getNews();
+    addBubble('fri',r);speak('Here are today\'s top headlines. '+r);setOrbState('idle');return;
+  }
+
+  // CALL
+  const callM=t.match(/^(?:call|ring|phone|dial)\s+(.+)$/);
+  if(callM){
+    const name=callM[1].trim();
+    const c=findContact(name);
+    if(c&&c.phone){
+      const r='Calling '+c.name;
+      addBubble('fri',r);speak(r);
+      setTimeout(()=>directCall(c.phone),1200);
+    } else if(c){
+      const r='I found '+c.name+' but no phone number is saved. Please add the number in Contacts tab.';
+      addBubble('fri',r);speak(r);
+    } else {
+      const r='I do not have '+name+' in your contacts. Please add them in the Contacts tab.';
+      addBubble('fri',r);speak(r);
+    }
+    setOrbState('idle');return;
+  }
+
+  // WHATSAPP
+  const waM=t.match(/^(?:whatsapp|whats app|message|text|chat with?)\s+(.+)$/);
+  if(waM){
+    const name=waM[1].trim();
+    const c=findContact(name);
+    if(c&&c.phone){
+      const r='Opening WhatsApp for '+c.name;
+      addBubble('fri',r);speak(r);
+      setTimeout(()=>directWA(c.phone),1000);
+    } else {
+      const r='No WhatsApp number saved for '+name+'. Add it in Contacts.';
+      addBubble('fri',r);speak(r);
+    }
+    setOrbState('idle');return;
+  }
+
+  // YOUTUBE PLAY
+  if((t.includes('play')||t.includes('song')||t.includes('music'))&&(t.includes('youtube')||t.includes('song')||t.includes('music'))){
+    let q=t.replace(/play|on youtube|youtube|song|music|video|open/g,'').trim()||'trending music';
+    const r='Playing '+q+' on YouTube';
+    addBubble('fri',r);speak(r);
+    setTimeout(()=>window.open('https://www.youtube.com/results?search_query='+encodeURIComponent(q),'_blank'),900);
+    setOrbState('idle');return;
+  }
+
+  // YOUTUBE OPEN
+  if(t==='open youtube'||t==='youtube'){
+    addBubble('fri','Opening YouTube');speak('Opening YouTube');
+    setTimeout(()=>window.open('https://www.youtube.com','_blank'),700);
+    setOrbState('idle');return;
+  }
+
+  // GOOGLE SEARCH
+  const gM=t.match(/(?:google|search(?:\s+for)?|find)\s+(.+?)(?:\s+on google)?$/);
+  if(gM&&!t.includes('amazon')&&!t.includes('flipkart')){
+    const q=gM[1].trim();
+    addBubble('fri','Searching Google for: '+q);speak('Searching Google for '+q);
+    setTimeout(()=>window.open('https://www.google.com/search?q='+encodeURIComponent(q),'_blank'),900);
+    setOrbState('idle');return;
+  }
+
+  // AMAZON
+  if(t.includes('amazon')){
+    const q=t.replace(/amazon|search|on|find|buy/g,'').trim()||'';
+    addBubble('fri',q?'Searching Amazon for '+q:'Opening Amazon');
+    speak(q?'Searching Amazon for '+q:'Opening Amazon');
+    setTimeout(()=>window.open(q?'https://www.amazon.in/s?k='+encodeURIComponent(q):'https://www.amazon.in','_blank'),900);
+    setOrbState('idle');return;
+  }
+
+  // FLIPKART
+  if(t.includes('flipkart')){
+    const q=t.replace(/flipkart|search|on|find|buy/g,'').trim()||'';
+    addBubble('fri',q?'Searching Flipkart for '+q:'Opening Flipkart');
+    speak(q?'Searching Flipkart for '+q:'Opening Flipkart');
+    setTimeout(()=>window.open(q?'https://www.flipkart.com/search?q='+encodeURIComponent(q):'https://www.flipkart.com','_blank'),900);
+    setOrbState('idle');return;
+  }
+
+  // OPEN APP / WEBSITE
+  const openM=t.match(/^open\s+(.+)$/);
+  if(openM){
+    const app=openM[1].trim();
+    const apps={
+      'instagram':'https://www.instagram.com','maps':'https://maps.google.com','google maps':'https://maps.google.com',
+      'twitter':'https://twitter.com','facebook':'https://www.facebook.com','gmail':'https://mail.google.com',
+      'netflix':'https://www.netflix.com','hotstar':'https://www.hotstar.com','spotify':'https://open.spotify.com',
+      'whatsapp':'https://wa.me','telegram':'https://web.telegram.org','linkedin':'https://www.linkedin.com',
+      'reddit':'https://www.reddit.com','snapchat':'https://web.snapchat.com','discord':'https://discord.com/app',
+      'github':'https://github.com','prime':'https://www.primevideo.com','amazon prime':'https://www.primevideo.com',
+      'google':'https://www.google.com','youtube':'https://www.youtube.com','chrome':'https://www.google.com',
+      'paytm':'https://paytm.com','phonepe':'https://www.phonepe.com','gpay':'https://pay.google.com',
+      'zomato':'https://www.zomato.com','swiggy':'https://www.swiggy.com','myntra':'https://www.myntra.com',
+    };
+    const url=apps[app]||(app.includes('.')?'https://'+app:null);
+    if(url){
+      addBubble('fri','Opening '+app);speak('Opening '+app);
+      setTimeout(()=>window.open(url,'_blank'),700);
+    } else {
+      const r='I can open Instagram, YouTube, Maps, WhatsApp, Gmail, Netflix, Amazon, Spotify, Zomato, Swiggy and more. Which one?';
+      addBubble('fri',r);speak(r);
+    }
+    setOrbState('idle');return;
+  }
+
+  // TAMIL GREETING
+  if(/[\u0B80-\u0BFF]/.test(text)||t.includes('vanakkam')||t.includes('வணக்கம்')){
+    const r='வணக்கம்! நான் FRIDAY. உங்களுக்கு என்ன உதவி செய்யட்டும்?';
+    addBubble('fri',r);speak(r);setOrbState('idle');return;
+  }
+
+  // GREETING
+  if(/^(hi|hello|hey|good morning|good evening|good afternoon)/.test(t)){
+    const h=new Date().getHours();
+    const g=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
+    const r=g+', '+CFG.name+'! How can I help you?';
+    addBubble('fri',r);speak(r);setOrbState('idle');return;
+  }
+
+  // IDENTITY
+  if(t.includes('who are you')||t.includes('what are you')||t.includes('your name')){
+    const r='I am FRIDAY, your personal AI assistant. I can call your contacts, play music, search the web, give you weather updates, news, and much more.';
+    addBubble('fri',r);speak(r);setOrbState('idle');return;
+  }
+
+  // AI BRAIN — Groq
+  if(CFG.groq_key){
+    const thinking=addBubble('fri','…');
+    thinking.classList.add('thinking');
+    const reply=await askGroq(text);
+    thinking.textContent=reply;
+    thinking.classList.remove('thinking');
+    speak(reply);
+  } else {
+    const r='I heard: "'+text+'". To get AI-powered answers, add your free Groq API key in Settings tab.';
+    addBubble('fri',r);speak(r);
+  }
+  setOrbState('idle');
+}
+
+// ── GROQ AI ────────────────────────────────────────────────────────────────
+async function askGroq(msg){
+  try{
+    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+CFG.groq_key},
+      body:JSON.stringify({
+        model:'llama-3.3-70b-versatile',
+        messages:[
+          {role:'system',content:`You are FRIDAY, a smart helpful Indian AI assistant. User's name is ${CFG.name}, city is ${CFG.city}. Keep answers concise and conversational. If user writes in Tamil, reply in Tamil.`},
+          {role:'user',content:msg}
+        ],
+        max_tokens:300,temperature:0.7
+      })
+    });
+    const d=await res.json();
+    return d.choices?.[0]?.message?.content?.trim()||'I could not get a response. Please try again.';
+  }catch(e){return 'AI error: '+e.message;}
+}
+
+// ── WEATHER ────────────────────────────────────────────────────────────────
+async function getWeather(city){
+  if(!CFG.weather_key) return 'Weather API key not set. Add it in Settings tab.';
+  try{
+    const r=await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${CFG.weather_key}&units=metric`);
+    const d=await r.json();
+    if(d.cod!==200) return 'Could not get weather for '+city+'.';
+    return `Weather in ${city}: ${d.weather[0].description}. Temperature ${Math.round(d.main.temp)}°C, feels like ${Math.round(d.main.feels_like)}°C. Humidity ${d.main.humidity}%, wind ${d.wind.speed} m/s.`;
+  }catch(e){return 'Weather error: '+e.message;}
+}
+
+// ── NEWS ───────────────────────────────────────────────────────────────────
+async function getNews(){
+  if(!CFG.news_key) return 'News API key not set. Add it in Settings tab.';
+  try{
+    const r=await fetch(`https://newsapi.org/v2/top-headlines?country=in&pageSize=5&apiKey=${CFG.news_key}`);
+    const d=await r.json();
+    const arts=d.articles||[];
+    if(!arts.length) return 'No headlines available right now.';
+    return arts.map((a,i)=>`${i+1}. ${a.title}`).join('\n');
+  }catch(e){return 'News error: '+e.message;}
+}
+
+// ── QUICK COMMAND FROM COMMANDS TAB ────────────────────────────────────────
+function tryCmd(text){
+  switchTab('chat');
+  setTimeout(()=>handleCommand(text),200);
+}
+
+// ── INIT ───────────────────────────────────────────────────────────────────
+loadCFG();
+loadContacts();
+loadVoices();
+
+const hasCfg=CFG.name&&CFG.name!=='Boss'||CFG.groq_key;
+if(localStorage.getItem('friday_cfg')){
+  document.getElementById('screen-setup').style.display='none';
+  showMain();
+}
+</script>
+</body>
+</html>

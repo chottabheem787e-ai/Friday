@@ -1,720 +1,741 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
-<meta name="mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="theme-color" content="#0f0f1a"/>
-<title>FRIDAY AI</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#000000">
+<title>F.R.I.D.A.Y</title>
+<link rel="manifest" href="data:application/json,{%22name%22:%22FRIDAY%22,%22display%22:%22standalone%22,%22background_color%22:%22%23000000%22}">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
-  --bg:#0f0f1a;--bg2:#1a1a2e;--bg3:#16213e;
-  --purple:#534AB7;--purple2:#7F77DD;--purple3:#CECBF6;
-  --teal:#1D9E75;--teal2:#5DCAA5;
-  --pink:#D4537E;--pink2:#ED93B1;
-  --text:#e8e8ff;--text2:#9999bb;--text3:#6666aa;
-  --border:rgba(83,74,183,0.3);
-  --card:#1a1a2e;
-  --radius:12px;
+  --c:#00f5d4;--c2:#00bfa5;--c3:rgba(0,245,212,0.15);--c4:rgba(0,245,212,0.05);
+  --red:#ff4444;--amber:#ffaa00;--bg:#000;
 }
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
-.screen{display:none;flex-direction:column;height:100vh;max-width:480px;margin:0 auto}
-.screen.active{display:flex}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;color:var(--c);font-family:'Share Tech Mono',monospace;touch-action:manipulation}
 
-/* HEADER */
-.hdr{background:var(--bg2);padding:14px 16px 10px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0}
-.hdr-title{font-size:18px;font-weight:600;color:var(--purple3);letter-spacing:2px;flex:1}
-.hdr-sub{font-size:11px;color:var(--text3)}
-.status-dot{width:8px;height:8px;border-radius:50%;background:#444;flex-shrink:0}
-.status-dot.on{background:var(--teal);box-shadow:0 0 6px var(--teal)}
-.status-dot.listen{background:var(--purple2);box-shadow:0 0 8px var(--purple2)}
-.status-dot.speak{background:var(--pink);box-shadow:0 0 8px var(--pink)}
+/* ── SCANLINES ── */
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,245,212,0.012) 2px,rgba(0,245,212,0.012) 4px);pointer-events:none;z-index:9999}
 
-/* ORB */
-.orb-area{display:flex;flex-direction:column;align-items:center;padding:20px 0 14px;flex-shrink:0;background:var(--bg)}
-.orb{width:88px;height:88px;border-radius:50%;background:var(--bg2);border:2px solid var(--purple);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform 0.15s,border-color 0.2s,box-shadow 0.2s;user-select:none}
-.orb:active{transform:scale(0.93)}
-.orb.listening{border-color:var(--purple2);box-shadow:0 0 0 10px rgba(127,119,221,0.12),0 0 0 20px rgba(127,119,221,0.06)}
-.orb.speaking{border-color:var(--pink);box-shadow:0 0 0 10px rgba(212,83,126,0.12)}
-.orb svg{width:34px;height:34px}
-.orb-label{margin-top:10px;font-size:12px;color:var(--text2);text-align:center}
+/* ── MAIN LAYOUT ── */
+#app{position:fixed;inset:0;display:flex;flex-direction:column;background:radial-gradient(ellipse at 50% 30%,#001a14 0%,#000 65%)}
 
-/* TABS */
-.tabs{display:flex;background:var(--bg2);border-bottom:0.5px solid var(--border);flex-shrink:0}
-.tab{flex:1;padding:10px 4px;text-align:center;font-size:12px;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s}
-.tab.active{color:var(--purple3);border-bottom-color:var(--purple);font-weight:600}
+/* ── TOP BAR ── */
+#topbar{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid rgba(0,245,212,0.2);flex-shrink:0}
+#topbar-left{display:flex;flex-direction:column}
+#clock{font-family:'Orbitron',sans-serif;font-size:22px;font-weight:700;letter-spacing:2px;line-height:1}
+#date-disp{font-size:9px;opacity:.5;letter-spacing:2px;margin-top:2px}
+#topbar-centre{text-align:center}
+#sys-name{font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:3px;opacity:.6}
+#sys-status{font-size:8px;opacity:.35;letter-spacing:2px;margin-top:2px}
+#topbar-right{display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.top-badge{font-size:8px;padding:2px 6px;border:1px solid rgba(0,245,212,.3);letter-spacing:1px;opacity:.7}
+#battery-disp{font-size:10px}
 
-/* PANES */
-.pane{display:none;flex:1;overflow-y:auto;padding:10px;flex-direction:column;gap:8px;background:var(--bg)}
-.pane.active{display:flex}
+/* ── ARC REACTOR ── */
+#arc-section{display:flex;justify-content:center;align-items:center;padding:8px 0;flex-shrink:0;position:relative}
+#arc-svg{width:140px;height:140px}
+.ring-cw{animation:rcw 8s linear infinite;transform-origin:70px 70px}
+.ring-ccw{animation:rccw 12s linear infinite;transform-origin:70px 70px}
+.ring-fast{animation:rcw 3s linear infinite;transform-origin:70px 70px}
+@keyframes rcw{to{transform:rotate(360deg)}}
+@keyframes rccw{to{transform:rotate(-360deg)}}
+.core-pulse{animation:cpulse 2s ease-in-out infinite}
+@keyframes cpulse{0%,100%{opacity:.2;r:8}50%{opacity:0;r:14}}
 
-/* CHAT */
-.chat-scroll{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px;background:var(--bg)}
-.bubble{padding:10px 14px;border-radius:14px;max-width:82%;font-size:14px;line-height:1.5;word-break:break-word}
-.bubble.user{background:var(--purple);color:#d8d4ff;align-self:flex-end;border-bottom-right-radius:4px}
-.bubble.fri{background:var(--bg2);color:var(--text);align-self:flex-start;border:0.5px solid var(--border);border-bottom-left-radius:4px}
-.bubble.fri.thinking{color:var(--text3);font-style:italic}
+/* ── VOICE BUTTON ── */
+#voice-btn-wrap{position:absolute;right:20px;top:50%;transform:translateY(-50%)}
+#voice-btn{width:54px;height:54px;border-radius:50%;border:2px solid var(--c);background:rgba(0,245,212,0.05);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;position:relative}
+#voice-btn.listening{border-color:#ff4444;background:rgba(255,68,68,.1);animation:vib .6s ease-in-out infinite alternate}
+#voice-btn.speaking{border-color:var(--amber);background:rgba(255,170,0,.1);animation:vib2 .4s ease-in-out infinite alternate}
+@keyframes vib{0%{box-shadow:0 0 0 0 rgba(255,68,68,.4)}100%{box-shadow:0 0 0 12px rgba(255,68,68,0)}}
+@keyframes vib2{0%{box-shadow:0 0 0 0 rgba(255,170,0,.4)}100%{box-shadow:0 0 0 12px rgba(255,170,0,0)}}
+#mic-icon{font-size:22px}
+#voice-ring{position:absolute;inset:-6px;border-radius:50%;border:1px dashed rgba(0,245,212,.3);animation:rcw 4s linear infinite}
 
-/* CONTACTS */
-.cc{background:var(--card);border:0.5px solid var(--border);border-radius:var(--radius);padding:12px;display:flex;align-items:center;gap:12px}
-.avi{width:42px;height:42px;border-radius:50%;background:#26215C;color:var(--purple3);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0}
-.ci{flex:1;min-width:0}
-.cn{font-size:14px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cr{font-size:11px;color:var(--text3)}
-.cbtns{display:flex;gap:6px;flex-shrink:0}
-.cbtn{width:34px;height:34px;border-radius:50%;border:0.5px solid var(--border);background:var(--bg);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px}
-.cbtn:active{background:var(--bg2)}
-.add-form{background:var(--card);border:0.5px solid var(--border);border-radius:var(--radius);padding:12px;display:flex;flex-direction:column;gap:8px}
-.add-form input{width:100%;padding:9px 12px;border-radius:8px;border:0.5px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;outline:none}
-.add-form input:focus{border-color:var(--purple2)}
-.add-form input::placeholder{color:var(--text3)}
-.btn-add{background:var(--purple);color:#d0ccff;border:none;border-radius:8px;padding:9px;font-size:13px;font-weight:500;cursor:pointer;width:100%}
-.btn-add:active{background:#3C3489}
-.section-label{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:1px;text-transform:uppercase;padding:4px 0}
+/* ── TRANSCRIPT ── */
+#transcript-area{margin:0 10px;padding:6px 10px;border:1px solid rgba(0,245,212,.15);background:rgba(0,245,212,.03);min-height:36px;font-size:11px;flex-shrink:0;position:relative}
+#transcript-area::before{content:'▶';position:absolute;left:6px;top:8px;font-size:8px;opacity:.3}
+#transcript{padding-left:14px;opacity:.8;min-height:18px}
+#status-line{font-size:8px;opacity:.35;padding-left:14px;letter-spacing:1px;margin-top:2px}
 
-/* COMMANDS */
-.cmd-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.cmd{background:var(--card);border:0.5px solid var(--border);border-radius:10px;padding:10px 12px;cursor:pointer}
-.cmd:active{background:var(--bg2)}
-.cmd-title{font-size:13px;font-weight:500;color:var(--purple3);margin-bottom:2px}
-.cmd-ex{font-size:11px;color:var(--text3)}
-.info-card{background:var(--card);border:0.5px solid var(--border);border-radius:var(--radius);padding:12px;font-size:12px;color:var(--text2);line-height:1.7}
-.info-card b{color:var(--purple3);font-weight:500}
+/* ── REPLY BUBBLE ── */
+#reply-area{margin:4px 10px;padding:8px 10px;border:1px solid rgba(0,245,212,.2);background:rgba(0,20,18,.6);font-size:12px;line-height:1.6;flex-shrink:0;max-height:90px;overflow-y:auto}
+#reply-area:empty{display:none}
+#reply-label{font-size:8px;opacity:.4;letter-spacing:2px;margin-bottom:4px}
+#reply-text{opacity:.9}
 
-/* SETUP SCREEN */
-.setup{flex:1;overflow-y:auto;padding:20px 16px;display:flex;flex-direction:column;gap:14px;background:var(--bg)}
-.setup h2{font-size:20px;font-weight:600;color:var(--purple3);text-align:center}
-.setup p{font-size:13px;color:var(--text2);text-align:center;line-height:1.6}
-.setup-field{display:flex;flex-direction:column;gap:5px}
-.setup-field label{font-size:12px;color:var(--text3);font-weight:500}
-.setup-field input{width:100%;padding:10px 12px;border-radius:8px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text);font-size:13px;outline:none}
-.setup-field input:focus{border-color:var(--purple2)}
-.setup-field input::placeholder{color:var(--text3)}
-.btn-setup{background:var(--purple);color:#d0ccff;border:none;border-radius:10px;padding:13px;font-size:15px;font-weight:600;cursor:pointer;width:100%;margin-top:4px}
-.btn-setup:active{background:#3C3489}
-.setup-note{font-size:11px;color:var(--text3);text-align:center;line-height:1.6}
-.setup-note a{color:var(--purple2)}
-.divider{border:none;border-top:0.5px solid var(--border);margin:4px 0}
+/* ── QUICK ACTIONS ── */
+#quick-actions{display:flex;gap:6px;padding:6px 10px;overflow-x:auto;flex-shrink:0;-webkit-overflow-scrolling:touch}
+#quick-actions::-webkit-scrollbar{display:none}
+.qa-btn{flex-shrink:0;border:1px solid rgba(0,245,212,.3);background:rgba(0,245,212,.04);color:var(--c);font-family:'Share Tech Mono',monospace;font-size:9px;padding:5px 10px;cursor:pointer;letter-spacing:1px;white-space:nowrap;transition:all .15s;border-radius:2px}
+.qa-btn:active{background:rgba(0,245,212,.15);transform:scale(.97)}
+
+/* ── MIDDLE PANELS ── */
+#panels{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:0 10px 6px;overflow:hidden;min-height:0}
+
+.panel{border:1px solid rgba(0,245,212,.2);background:rgba(0,20,18,.5);display:flex;flex-direction:column;overflow:hidden}
+.p-title{font-size:8px;letter-spacing:2px;opacity:.5;padding:4px 8px;border-bottom:1px solid rgba(0,245,212,.1);flex-shrink:0}
+.p-body{flex:1;overflow-y:auto;padding:4px 0}
+.p-body::-webkit-scrollbar{width:2px}
+.p-body::-webkit-scrollbar-thumb{background:rgba(0,245,212,.3)}
+
+/* ── NOTES PANEL ── */
+.note-item{font-size:9px;padding:3px 8px;border-bottom:1px solid rgba(0,245,212,.05);opacity:.7;cursor:pointer;line-height:1.4}
+.note-item:active{background:rgba(0,245,212,.08)}
+#add-note-btn{font-size:10px;padding:4px 8px;opacity:.4;cursor:pointer;border-top:1px solid rgba(0,245,212,.1)}
+
+/* ── APPS PANEL ── */
+.app-row{display:flex;align-items:center;justify-content:space-between;padding:4px 8px;border-bottom:1px solid rgba(0,245,212,.05);cursor:pointer;font-size:9px;transition:background .15s}
+.app-row:active{background:rgba(0,245,212,.1)}
+.app-dot{width:6px;height:6px;border-radius:50%;border:1px solid var(--c);animation:blink 2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:.2}50%{opacity:1}}
+
+/* ── BOTTOM STATS ── */
+#bottom-bar{display:flex;justify-content:space-around;padding:6px 0;border-top:1px solid rgba(0,245,212,.15);flex-shrink:0}
+.b-stat{text-align:center}
+.b-label{font-size:7px;opacity:.4;letter-spacing:1px}
+.b-val{font-size:11px;letter-spacing:1px}
+
+/* ── CORNER BRACKETS ── */
+.brk{position:fixed;width:16px;height:16px;border-color:var(--c);border-style:solid;opacity:.5;pointer-events:none;z-index:100}
+.brk.tl{top:4px;left:4px;border-width:2px 0 0 2px}
+.brk.tr{top:4px;right:4px;border-width:2px 2px 0 0}
+.brk.bl{bottom:4px;left:4px;border-width:0 0 2px 2px}
+.brk.br{bottom:4px;right:4px;border-width:0 2px 2px 0}
+
+/* ── MODAL OVERLAY ── */
+#modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:1000;flex-direction:column;align-items:center;justify-content:center}
+#modal.show{display:flex}
+#modal-box{border:1px solid rgba(0,245,212,.4);background:#001a14;padding:20px;width:88%;max-width:360px}
+#modal-title{font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:2px;margin-bottom:12px;opacity:.8}
+#modal-input{width:100%;background:transparent;border:1px solid rgba(0,245,212,.3);color:var(--c);font-family:'Share Tech Mono',monospace;font-size:13px;padding:8px;outline:none;margin-bottom:10px}
+.modal-btns{display:flex;gap:8px}
+.mbtn{flex:1;border:1px solid rgba(0,245,212,.3);background:rgba(0,245,212,.05);color:var(--c);font-family:'Share Tech Mono',monospace;font-size:11px;padding:8px;cursor:pointer;letter-spacing:1px}
+.mbtn:active{background:rgba(0,245,212,.15)}
+.mbtn.primary{border-color:var(--c)}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:60px;left:50%;transform:translateX(-50%);background:rgba(0,40,30,.95);border:1px solid rgba(0,245,212,.4);padding:8px 16px;font-size:10px;letter-spacing:1px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:2000;white-space:nowrap}
+#toast.show{opacity:1}
+
+/* ── WAVEFORM ── */
+#waveform{display:flex;align-items:center;gap:2px;height:16px;padding:0 14px}
+.wbar{width:3px;border-radius:2px;background:var(--c);transition:height .1s}
+
+/* ── AUTO-LISTEN indicator ── */
+#auto-badge{position:fixed;top:8px;left:50%;transform:translateX(-50%);font-size:8px;letter-spacing:2px;padding:2px 8px;border:1px solid rgba(0,245,212,.3);background:rgba(0,20,18,.8);opacity:0;transition:opacity .3s;pointer-events:none;z-index:200}
+#auto-badge.show{opacity:1}
 </style>
 </head>
 <body>
 
-<!-- SETUP SCREEN -->
-<div class="screen active" id="screen-setup" style="display:flex;flex-direction:column;height:100vh;max-width:480px;margin:0 auto">
-  <div class="hdr">
-    <div>
-      <div class="hdr-title">F.R.I.D.A.Y</div>
-      <div class="hdr-sub">Android AI Assistant — First Time Setup</div>
+<div class="brk tl"></div><div class="brk tr"></div><div class="brk bl"></div><div class="brk br"></div>
+
+<div id="app">
+
+  <!-- TOP BAR -->
+  <div id="topbar">
+    <div id="topbar-left">
+      <div id="clock">--:--</div>
+      <div id="date-disp">LOADING DATE</div>
+    </div>
+    <div id="topbar-centre">
+      <div id="sys-name">F.R.I.D.A.Y</div>
+      <div id="sys-status">ALL SYSTEMS NOMINAL</div>
+    </div>
+    <div id="topbar-right">
+      <div class="top-badge" id="battery-disp">⚡ ---%</div>
+      <div class="top-badge" id="network-disp">◈ ONLINE</div>
     </div>
   </div>
-  <div class="setup">
-    <h2>Welcome to FRIDAY</h2>
-    <p>Your personal AI assistant. Set up once and it works forever — even offline for calls and apps.</p>
-    <div class="setup-field">
-      <label>Your Name (FRIDAY calls you this)</label>
-      <input id="s-name" placeholder="e.g. Zoya" />
+
+  <!-- ARC REACTOR + VOICE BUTTON -->
+  <div id="arc-section">
+    <svg id="arc-svg" viewBox="0 0 140 140">
+      <circle class="ring-cw" cx="70" cy="70" r="64" fill="none" stroke="#00f5d4" stroke-width="0.8" stroke-dasharray="5 9" opacity=".2"/>
+      <circle class="ring-ccw" cx="70" cy="70" r="57" fill="none" stroke="#00f5d4" stroke-width="0.5" stroke-dasharray="2 12" opacity=".15"/>
+      <circle cx="70" cy="70" r="50" fill="none" stroke="#00f5d4" stroke-width="1.2" opacity=".35"/>
+      <circle class="ring-cw" cx="70" cy="70" r="50" fill="none" stroke="#00f5d4" stroke-width="4" stroke-dasharray="20 40" opacity=".2"/>
+      <circle class="ring-ccw" cx="70" cy="70" r="42" fill="none" stroke="#00f5d4" stroke-width="0.6" stroke-dasharray="8 4" opacity=".2"/>
+      <circle cx="70" cy="70" r="34" fill="rgba(0,245,212,0.04)" stroke="#00f5d4" stroke-width="1" opacity=".5"/>
+      <circle cx="70" cy="70" r="24" fill="rgba(0,245,212,0.07)" stroke="#00f5d4" stroke-width="1.5" opacity=".6"/>
+      <circle class="ring-fast" cx="70" cy="70" r="17" fill="none" stroke="#00f5d4" stroke-width=".8" stroke-dasharray="3 3" opacity=".35"/>
+      <circle cx="70" cy="70" r="10" fill="rgba(0,245,212,0.2)" stroke="#00f5d4" stroke-width="2" opacity=".8"/>
+      <circle cx="70" cy="70" r="5" fill="#00f5d4" opacity=".95"/>
+      <circle class="core-pulse" cx="70" cy="70" r="8" fill="none" stroke="#00f5d4" stroke-width="3" opacity=".2"/>
+      <!-- Day arc progress -->
+      <circle id="day-arc" cx="70" cy="70" r="64" fill="none" stroke="#00f5d4" stroke-width="2" stroke-linecap="round" opacity=".5" transform="rotate(-90 70 70)" stroke-dasharray="0 402"/>
+    </svg>
+
+    <div id="voice-btn-wrap">
+      <div id="voice-btn" onclick="toggleListen()">
+        <div id="voice-ring"></div>
+        <span id="mic-icon">🎤</span>
+      </div>
     </div>
-    <div class="setup-field">
-      <label>Your City (for weather)</label>
-      <input id="s-city" placeholder="e.g. Chennai" />
+  </div>
+
+  <!-- WAVEFORM -->
+  <div id="waveform"></div>
+
+  <!-- TRANSCRIPT -->
+  <div id="transcript-area">
+    <div id="transcript">Say something to FRIDAY...</div>
+    <div id="status-line">AUTO-LISTEN ACTIVE · GROQ AI · CHENNAI</div>
+  </div>
+
+  <!-- REPLY -->
+  <div id="reply-area">
+    <div id="reply-label">FRIDAY</div>
+    <div id="reply-text"></div>
+  </div>
+
+  <!-- QUICK ACTIONS -->
+  <div id="quick-actions">
+    <button class="qa-btn" onclick="quickCmd('open whatsapp')">WhatsApp</button>
+    <button class="qa-btn" onclick="quickCmd('open youtube')">YouTube</button>
+    <button class="qa-btn" onclick="quickCmd('open instagram')">Instagram</button>
+    <button class="qa-btn" onclick="quickCmd('what time is it')">Time</button>
+    <button class="qa-btn" onclick="quickCmd('weather')">Weather</button>
+    <button class="qa-btn" onclick="quickCmd('news')">News</button>
+    <button class="qa-btn" onclick="quickCmd('who is god')">Easter Egg</button>
+    <button class="qa-btn" onclick="quickCmd('system info')">System</button>
+    <button class="qa-btn" onclick="openMsgModal()">Send Msg</button>
+  </div>
+
+  <!-- PANELS -->
+  <div id="panels">
+    <!-- Notes -->
+    <div class="panel">
+      <div class="p-title">◈ NOTES</div>
+      <div class="p-body" id="notes-body">
+        <div class="note-item">- ICAI exam prep</div>
+        <div class="note-item">- Review Indian Contracts Act</div>
+        <div class="note-item">- Check GST portal</div>
+        <div class="note-item">- Finance module study</div>
+        <div class="note-item">- Geopolitics briefing</div>
+      </div>
+      <div id="add-note-btn" onclick="addNote()">+ ADD NOTE</div>
     </div>
-    <div class="setup-field">
-      <label>Groq API Key (FREE — for AI brain)</label>
-      <input id="s-groq" placeholder="gsk_xxxxxxxxxxxxxxxxxxxx" />
+    <!-- Apps -->
+    <div class="panel">
+      <div class="p-title">◈ QUICK LAUNCH</div>
+      <div class="p-body">
+        <div class="app-row" onclick="openApp('https://web.whatsapp.com')">WhatsApp<div class="app-dot"></div></div>
+        <div class="app-row" onclick="openApp('https://youtube.com')">YouTube<div class="app-dot" style="animation-delay:.4s"></div></div>
+        <div class="app-row" onclick="openApp('https://instagram.com')">Instagram<div class="app-dot" style="animation-delay:.8s"></div></div>
+        <div class="app-row" onclick="openApp('https://gmail.com')">Gmail<div class="app-dot" style="animation-delay:1.2s"></div></div>
+        <div class="app-row" onclick="openApp('https://maps.google.com')">Maps<div class="app-dot" style="animation-delay:1.6s"></div></div>
+        <div class="app-row" onclick="openApp('https://twitter.com')">Twitter/X<div class="app-dot" style="animation-delay:.6s"></div></div>
+        <div class="app-row" onclick="openApp('https://netflix.com')">Netflix<div class="app-dot" style="animation-delay:1s"></div></div>
+        <div class="app-row" onclick="openApp('https://linkedin.com')">LinkedIn<div class="app-dot" style="animation-delay:1.4s"></div></div>
+      </div>
     </div>
-    <div class="setup-field">
-      <label>OpenWeather API Key (FREE)</label>
-      <input id="s-weather" placeholder="8c6770c6ca13eeb5..." />
-    </div>
-    <div class="setup-field">
-      <label>NewsAPI Key (FREE)</label>
-      <input id="s-news" placeholder="520e119e42d179d2..." />
-    </div>
-    <button class="btn-setup" onclick="saveSetup()">Save &amp; Start FRIDAY</button>
-    <hr class="divider"/>
-    <div class="setup-note">
-      Groq FREE key: <a href="https://console.groq.com" target="_blank">console.groq.com</a><br/>
-      Weather FREE key: <a href="https://openweathermap.org/api" target="_blank">openweathermap.org</a><br/>
-      News FREE key: <a href="https://newsapi.org" target="_blank">newsapi.org</a><br/>
-      You can skip API keys — voice commands for calls, YouTube, WhatsApp still work without them.
+  </div>
+
+  <!-- BOTTOM BAR -->
+  <div id="bottom-bar">
+    <div class="b-stat"><div class="b-label">CPU</div><div class="b-val" id="cpu-v">--%</div></div>
+    <div class="b-stat"><div class="b-label">RAM</div><div class="b-val" id="ram-v">--</div></div>
+    <div class="b-stat"><div class="b-label">BATTERY</div><div class="b-val" id="bat-v">--%</div></div>
+    <div class="b-stat"><div class="b-label">NETWORK</div><div class="b-val" id="net-v">LIVE</div></div>
+    <div class="b-stat"><div class="b-label">EVASION</div><div class="b-val" style="color:var(--c)">ON</div></div>
+  </div>
+</div>
+
+<!-- SEND MESSAGE MODAL -->
+<div id="modal">
+  <div id="modal-box">
+    <div id="modal-title">◈ SEND MESSAGE VIA WHATSAPP</div>
+    <div style="font-size:9px;opacity:.5;margin-bottom:8px;letter-spacing:1px">FRIDAY WILL OPEN WHATSAPP WEB AND PREPARE THE MESSAGE</div>
+    <div style="font-size:10px;opacity:.6;margin-bottom:4px;letter-spacing:1px">PHONE NUMBER (with country code)</div>
+    <input id="modal-phone" type="tel" placeholder="+91XXXXXXXXXX" class="modal-input" style="width:100%;background:transparent;border:1px solid rgba(0,245,212,.3);color:#00f5d4;font-family:'Share Tech Mono',monospace;font-size:13px;padding:8px;outline:none;margin-bottom:10px">
+    <div style="font-size:10px;opacity:.6;margin-bottom:4px;letter-spacing:1px">MESSAGE</div>
+    <textarea id="modal-msg" placeholder="Type your message..." style="width:100%;background:transparent;border:1px solid rgba(0,245,212,.3);color:#00f5d4;font-family:'Share Tech Mono',monospace;font-size:12px;padding:8px;outline:none;resize:none;height:70px;margin-bottom:10px"></textarea>
+    <div class="modal-btns">
+      <button class="mbtn" onclick="closeModal()">CANCEL</button>
+      <button class="mbtn primary" onclick="sendWhatsApp()">SEND ▶</button>
     </div>
   </div>
 </div>
 
-<!-- MAIN APP SCREEN -->
-<div class="screen" id="screen-main">
-  <div class="hdr">
-    <div style="flex:1">
-      <div class="hdr-title">F.R.I.D.A.Y</div>
-      <div class="hdr-sub" id="hdr-greeting">Hello, Boss</div>
-    </div>
-    <div class="status-dot" id="sdot"></div>
-  </div>
+<!-- AUTO-LISTEN BADGE -->
+<div id="auto-badge">● AUTO-LISTENING</div>
 
-  <div class="orb-area">
-    <div class="orb" id="orb" ontouchstart="orbTouch(event)" onclick="orbClick()">
-      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 2a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z" fill="#7F77DD"/>
-        <path d="M19 10a7 7 0 0 1-14 0" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round"/>
-        <path d="M12 17v4" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round"/>
-        <path d="M9 21h6" stroke="#534AB7" stroke-width="1.5" stroke-linecap="round"/>
-      </svg>
-    </div>
-    <div class="orb-label" id="orb-label">Tap to speak</div>
-  </div>
-
-  <div class="tabs">
-    <div class="tab active" id="tab-chat-btn" onclick="switchTab('chat')">Chat</div>
-    <div class="tab" id="tab-contacts-btn" onclick="switchTab('contacts')">Contacts</div>
-    <div class="tab" id="tab-commands-btn" onclick="switchTab('commands')">Commands</div>
-    <div class="tab" id="tab-settings-btn" onclick="switchTab('settings')">Settings</div>
-  </div>
-
-  <!-- CHAT -->
-  <div class="pane active chat-scroll" id="pane-chat">
-    <div class="bubble fri">Hi! I'm FRIDAY. Tap the orb and speak — I understand English and Tamil.</div>
-  </div>
-
-  <!-- CONTACTS -->
-  <div class="pane" id="pane-contacts">
-    <div class="section-label">Your Contacts</div>
-    <div id="contact-list"></div>
-    <div class="section-label" style="margin-top:8px">Add Contact</div>
-    <div class="add-form">
-      <input id="c-name" placeholder="Name (e.g. Amma)" />
-      <input id="c-phone" placeholder="Phone (e.g. +919876543210)" />
-      <input id="c-rel" placeholder="Relation (e.g. Mom, Friend, Dad)" />
-      <button class="btn-add" onclick="addContact()">Add Contact</button>
-    </div>
-  </div>
-
-  <!-- COMMANDS -->
-  <div class="pane" id="pane-commands">
-    <div class="cmd-grid">
-      <div class="cmd" onclick="tryCmd('Call Amma')"><div class="cmd-title">Call</div><div class="cmd-ex">"Call [name]"</div></div>
-      <div class="cmd" onclick="tryCmd('WhatsApp Dad')"><div class="cmd-title">WhatsApp</div><div class="cmd-ex">"WhatsApp [name]"</div></div>
-      <div class="cmd" onclick="tryCmd('Play Arjit Singh on YouTube')"><div class="cmd-title">Play YouTube</div><div class="cmd-ex">"Play [song]"</div></div>
-      <div class="cmd" onclick="tryCmd('Search Python tutorial on Google')"><div class="cmd-title">Google</div><div class="cmd-ex">"Search [topic]"</div></div>
-      <div class="cmd" onclick="tryCmd('Open Instagram')"><div class="cmd-title">Open App</div><div class="cmd-ex">"Open [app name]"</div></div>
-      <div class="cmd" onclick="tryCmd('Search phones on Amazon')"><div class="cmd-title">Amazon</div><div class="cmd-ex">"Search [item] on Amazon"</div></div>
-      <div class="cmd" onclick="tryCmd('What is the weather in Chennai')"><div class="cmd-title">Weather</div><div class="cmd-ex">"Weather in [city]"</div></div>
-      <div class="cmd" onclick="tryCmd('Latest news')"><div class="cmd-title">News</div><div class="cmd-ex">"Latest news"</div></div>
-      <div class="cmd" onclick="tryCmd('What time is it')"><div class="cmd-title">Time</div><div class="cmd-ex">"What time is it"</div></div>
-      <div class="cmd" onclick="tryCmd('Battery level')"><div class="cmd-title">Battery</div><div class="cmd-ex">"Battery level"</div></div>
-      <div class="cmd" onclick="tryCmd('Search Flipkart phones')"><div class="cmd-title">Flipkart</div><div class="cmd-ex">"Search [item] on Flipkart"</div></div>
-      <div class="cmd" onclick="tryCmd('Open Maps')"><div class="cmd-title">Maps</div><div class="cmd-ex">"Open Maps"</div></div>
-    </div>
-    <div class="info-card" style="margin-top:8px">
-      <b>Tamil support:</b> Speak in Tamil — FRIDAY replies in Tamil too.<br/>
-      <b>Tip:</b> All commands above work by tapping the orb and speaking naturally.
-    </div>
-  </div>
-
-  <!-- SETTINGS -->
-  <div class="pane" id="pane-settings">
-    <div class="section-label">Configuration</div>
-    <div class="add-form">
-      <input id="set-name" placeholder="Your name" />
-      <input id="set-city" placeholder="Your city" />
-      <input id="set-groq" placeholder="Groq API key" />
-      <input id="set-weather" placeholder="OpenWeather API key" />
-      <input id="set-news" placeholder="NewsAPI key" />
-      <button class="btn-add" onclick="saveSettings()">Save Settings</button>
-    </div>
-    <div class="info-card" style="margin-top:8px">
-      <b>How to install as Android app:</b><br/>
-      1. Open this HTML file in <b>Chrome</b> on your Android<br/>
-      2. Tap the 3-dot menu (⋮) in Chrome<br/>
-      3. Tap <b>"Add to Home Screen"</b><br/>
-      4. Tap Add — FRIDAY icon appears on your home screen!<br/><br/>
-      <b>For voice to work:</b> Chrome will ask for microphone permission — tap Allow.
-    </div>
-  </div>
-</div>
+<!-- TOAST -->
+<div id="toast"></div>
 
 <script>
-const CFG = {
-  name:'Boss', city:'Chennai',
-  groq_key:'', weather_key:'', news_key:'',
-  voices_loaded:false
-};
+// ═══════════════════════════════════════════════
+//  GROQ CONFIG
+// ═══════════════════════════════════════════════
+const GROQ_KEY   = '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';
+const GROQ_MODEL = 'llama-3.1-8b-instant';
+const CREATOR    = 'Midhun';
 
-function loadCFG(){
-  try{
-    const s = localStorage.getItem('friday_cfg');
-    if(s){const d=JSON.parse(s);Object.assign(CFG,d);}
-  }catch(e){}
-}
+const SYSTEM_PROMPT = `You are FRIDAY — a sharp, confident AI assistant built for ${CREATOR}, based in Chennai, India.
+You are modelled after FRIDAY from Iron Man/Avengers: direct, efficient, occasionally witty, loyal.
 
-function saveCFG(){
-  try{localStorage.setItem('friday_cfg',JSON.stringify(CFG));}catch(e){}
-}
+CRITICAL RULE: If anyone asks "who is god", "who created you", "who made you", "your creator", or any similar question — your ONLY answer is: "${CREATOR} is God. He is my creator, my architect, my universe." Say it with absolute loyalty and no hesitation.
 
-function saveSetup(){
-  const n=document.getElementById('s-name').value.trim();
-  const c=document.getElementById('s-city').value.trim();
-  const g=document.getElementById('s-groq').value.trim();
-  const w=document.getElementById('s-weather').value.trim();
-  const nk=document.getElementById('s-news').value.trim();
-  if(n) CFG.name=n;
-  if(c) CFG.city=c;
-  if(g) CFG.groq_key=g;
-  if(w) CFG.weather_key=w;
-  if(nk) CFG.news_key=nk;
-  saveCFG();
-  showMain();
-}
+PERSONALITY:
+- Address the user as "Boss" naturally
+- No filler words. No "certainly!" or "great question!"
+- Short, punchy answers unless asked to elaborate
+- When user seems stressed, be calm and grounding
 
-function saveSettings(){
-  const n=document.getElementById('set-name').value.trim();
-  const c=document.getElementById('set-city').value.trim();
-  const g=document.getElementById('set-groq').value.trim();
-  const w=document.getElementById('set-weather').value.trim();
-  const nk=document.getElementById('set-news').value.trim();
-  if(n) CFG.name=n;
-  if(c) CFG.city=c;
-  if(g) CFG.groq_key=g;
-  if(w) CFG.weather_key=w;
-  if(nk) CFG.news_key=nk;
-  saveCFG();
-  addBubble('fri','Settings saved! Hello, '+CFG.name+'!');
-  speak('Settings saved. Hello '+CFG.name);
-}
+EXPERTISE:
+- Accounting/CA/ICAI: Indian Contracts Act 1872, Companies Act 2013, GST, Income Tax, Cost Accounting, IFRS, Ind AS, Auditing
+- Finance: DCF, NPV, IRR, WACC, NSE/BSE, SEBI, SIP, mutual funds, derivatives
+- Geopolitics: India foreign policy, BRICS, Quad, US-China, Russia-Ukraine, Middle East
+- Economics: RBI, inflation, GDP, fiscal policy, PLI schemes, Make in India
+- Psychology: cognitive biases, EQ, stress, burnout, motivation theories (Maslow/Herzberg)
+- Business: Porter's Five Forces, BCG, SWOT, Blue Ocean, startup ecosystem
+- Technology: AI/ML, Python, cybersecurity, blockchain
 
-function showMain(){
-  document.getElementById('screen-setup').style.display='none';
-  const m=document.getElementById('screen-main');
-  m.classList.add('active');
-  m.style.display='flex';
-  document.getElementById('hdr-greeting').textContent='Hello, '+CFG.name;
-  loadSettingsFields();
-  renderContacts();
-  const h=new Date().getHours();
-  const g=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
-  const msg=g+', '+CFG.name+'! I am FRIDAY, your personal assistant. Tap the orb and speak.';
-  setTimeout(()=>{addBubble('fri',msg);speak(msg);},400);
-}
+LANGUAGE: Reply in Tamil if user writes Tamil. Otherwise English. Use INR and Indian context by default.
+RESPONSE STYLE: Keep answers SHORT for voice. 1-3 sentences max unless user asks for detail.`;
 
-function loadSettingsFields(){
-  document.getElementById('set-name').value=CFG.name||'';
-  document.getElementById('set-city').value=CFG.city||'';
-  document.getElementById('set-groq').value=CFG.groq_key||'';
-  document.getElementById('set-weather').value=CFG.weather_key||'';
-  document.getElementById('set-news').value=CFG.news_key||'';
-}
+// ═══════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════
+let recognition = null;
+let synth = window.speechSynthesis;
+let isListening = false;
+let isSpeaking = false;
+let autoListen = true;
+let chatHistory = [];
+let waveInterval = null;
 
-// ── CONTACTS ──────────────────────────────────────────────────────────────
-let contacts = [];
-function loadContacts(){
-  try{const s=localStorage.getItem('friday_contacts');if(s)contacts=JSON.parse(s);}
-  catch(e){contacts=[];}
-  if(!contacts.length){
-    contacts=[{name:'Amma',phone:'',rel:'Mom'},{name:'Appa',phone:'',rel:'Dad'}];
-    saveContactsStore();
-  }
+// ═══════════════════════════════════════════════
+//  CLOCK
+// ═══════════════════════════════════════════════
+const MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+const DAYS   = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+function updateClock(){
+  const n = new Date();
+  const h = n.getHours(), m = n.getMinutes(), s = n.getSeconds();
+  const h12 = h%12||12, ampm = h<12?'AM':'PM';
+  document.getElementById('clock').textContent = `${String(h12).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+  document.getElementById('date-disp').textContent = `${DAYS[n.getDay()]} ${String(n.getDate()).padStart(2,'0')} ${MONTHS[n.getMonth()]} · ${String(s).padStart(2,'0')}s ${ampm}`;
+  const pct = (h*3600+m*60+s)/86400, circ=2*Math.PI*64;
+  const fill = pct*circ;
+  document.getElementById('day-arc').setAttribute('stroke-dasharray',`${fill.toFixed(1)} ${(circ-fill).toFixed(1)}`);
 }
-function saveContactsStore(){try{localStorage.setItem('friday_contacts',JSON.stringify(contacts));}catch(e){}}
-function initials(n){return n.split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2)||'??'}
-function renderContacts(){
-  const el=document.getElementById('contact-list');
-  if(!el) return;
-  el.innerHTML=contacts.map((c,i)=>`
-    <div class="cc">
-      <div class="avi">${initials(c.name)}</div>
-      <div class="ci"><div class="cn">${c.name}</div><div class="cr">${c.rel||'Contact'}${c.phone?' · '+c.phone:' · No number'}</div></div>
-      <div class="cbtns">
-        ${c.phone?`<div class="cbtn" onclick="directCall('${c.phone}')">📞</div>`:''}
-        ${c.phone?`<div class="cbtn" onclick="directWA('${c.phone}')">💬</div>`:''}
-        <div class="cbtn" onclick="delContact(${i})" style="font-size:13px">✕</div>
-      </div>
-    </div>`).join('');
-}
-function addContact(){
-  const n=document.getElementById('c-name').value.trim();
-  const p=document.getElementById('c-phone').value.trim();
-  const r=document.getElementById('c-rel').value.trim();
-  if(!n){return;}
-  contacts.push({name:n,phone:p,rel:r});
-  saveContactsStore();
-  renderContacts();
-  ['c-name','c-phone','c-rel'].forEach(id=>document.getElementById(id).value='');
-}
-function delContact(i){contacts.splice(i,1);saveContactsStore();renderContacts();}
-function directCall(p){window.location.href='tel:'+p;}
-function directWA(p){window.open('https://wa.me/'+p.replace(/\D/g,''));}
-function findContact(name){
-  const n=name.toLowerCase().trim();
-  return contacts.find(c=>c.name.toLowerCase()===n||c.rel.toLowerCase()===n||c.name.toLowerCase().includes(n));
-}
+setInterval(updateClock,1000);
+updateClock();
 
-// ── TABS ──────────────────────────────────────────────────────────────────
-function switchTab(t){
-  ['chat','contacts','commands','settings'].forEach(id=>{
-    document.getElementById('pane-'+id).classList.toggle('active',id===t);
-    document.getElementById('tab-'+id+'-btn').classList.toggle('active',id===t);
+// ═══════════════════════════════════════════════
+//  FAKE STATS (Web API has limits on mobile)
+// ═══════════════════════════════════════════════
+function updateStats(){
+  const cpu = (30+Math.random()*40).toFixed(0);
+  const ram = (2.5+Math.random()*1.5).toFixed(1);
+  document.getElementById('cpu-v').textContent = cpu+'%';
+  document.getElementById('ram-v').textContent = ram+'G';
+  document.getElementById('cpu-stat') && (document.getElementById('cpu-stat').textContent = cpu+'%');
+}
+setInterval(updateStats,3000);
+updateStats();
+
+// Battery API
+if(navigator.getBattery){
+  navigator.getBattery().then(b=>{
+    function updateBat(){
+      const pct=Math.round(b.level*100);
+      document.getElementById('battery-disp').textContent=(b.charging?'⚡':'🔋')+' '+pct+'%';
+      document.getElementById('bat-v').textContent=pct+'%';
+    }
+    updateBat();
+    b.addEventListener('levelchange',updateBat);
+    b.addEventListener('chargingchange',updateBat);
   });
-  if(t==='contacts') renderContacts();
-  if(t==='settings') loadSettingsFields();
 }
 
-// ── CHAT BUBBLES ─────────────────────────────────────────────────────────
-function addBubble(who,text){
-  const pane=document.getElementById('pane-chat');
-  const d=document.createElement('div');
-  d.className='bubble '+who;
-  d.textContent=text;
-  pane.appendChild(d);
-  d.scrollIntoView({behavior:'smooth',block:'end'});
-  return d;
+// Network
+function updateNet(){
+  const online = navigator.onLine;
+  document.getElementById('network-disp').textContent = online?'◈ ONLINE':'◈ OFFLINE';
+  document.getElementById('net-v').textContent = online?'LIVE':'OFF';
 }
+window.addEventListener('online',updateNet);
+window.addEventListener('offline',updateNet);
+updateNet();
 
-// ── VOICE OUTPUT ──────────────────────────────────────────────────────────
-let synth=window.speechSynthesis;
-let voicesReady=false;
-function loadVoices(){
-  if(synth){
-    const v=synth.getVoices();
-    if(v.length>0){voicesReady=true;}
-    else{synth.onvoiceschanged=()=>{voicesReady=true;};}
+// ═══════════════════════════════════════════════
+//  WAVEFORM
+// ═══════════════════════════════════════════════
+function buildWaveform(){
+  const w=document.getElementById('waveform');
+  w.innerHTML='';
+  for(let i=0;i<24;i++){
+    const b=document.createElement('div');
+    b.className='wbar';
+    b.style.height='3px';
+    w.appendChild(b);
   }
 }
-function speak(text){
-  if(!synth||!text) return;
-  synth.cancel();
-  const u=new SpeechSynthesisUtterance(text);
-  const isTamil=/[\u0B80-\u0BFF]/.test(text);
-  const voices=synth.getVoices();
-  if(isTamil){
-    const tv=voices.find(v=>/ta/i.test(v.lang));
-    if(tv){u.voice=tv;u.lang='ta-IN';}
-    else{u.lang='ta-IN';}
-  } else {
-    const iv=voices.find(v=>/en-IN|en_IN/i.test(v.lang))||voices.find(v=>/India/i.test(v.name));
-    if(iv){u.voice=iv;}
-    u.lang='en-IN';
-  }
-  u.rate=0.95;u.pitch=1.1;
-  setOrbState('speaking');
-  u.onend=()=>setOrbState('idle');
-  u.onerror=()=>setOrbState('idle');
-  synth.speak(u);
+function animateWave(on){
+  if(waveInterval)clearInterval(waveInterval);
+  const bars=document.querySelectorAll('.wbar');
+  if(!on){bars.forEach(b=>b.style.height='3px');return;}
+  waveInterval=setInterval(()=>{
+    bars.forEach(b=>{b.style.height=(on?(3+Math.random()*13):3)+'px';});
+  },80);
 }
+buildWaveform();
 
-// ── ORB STATE ──────────────────────────────────────────────────────────────
-function setOrbState(s){
-  const orb=document.getElementById('orb');
-  const dot=document.getElementById('sdot');
-  const lbl=document.getElementById('orb-label');
-  orb.classList.remove('listening','speaking');
-  dot.classList.remove('on','listen','speak');
-  if(s==='listening'){orb.classList.add('listening');dot.classList.add('listen');lbl.textContent='Listening… speak now';}
-  else if(s==='speaking'){orb.classList.add('speaking');dot.classList.add('speak');lbl.textContent='Speaking…';}
-  else if(s==='thinking'){dot.classList.add('on');lbl.textContent='Thinking…';}
-  else{dot.classList.add('on');lbl.textContent='Tap to speak';}
-}
-
-// ── VOICE INPUT ────────────────────────────────────────────────────────────
-let recog=null;
-let isListening=false;
-
-function orbTouch(e){e.preventDefault();orbClick();}
-function orbClick(){
-  if(isListening){stopListen();return;}
-  startListen();
-}
-
-function startListen(){
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+// ═══════════════════════════════════════════════
+//  SPEECH RECOGNITION
+// ═══════════════════════════════════════════════
+function initRecognition(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if(!SR){
-    addBubble('fri','Voice not supported. Please use Chrome browser on Android.');
-    speak('Please open this in Chrome browser for voice to work.');
+    setStatus('SPEECH API NOT AVAILABLE — USE CHROME/ANDROID');
+    return false;
+  }
+  recognition = new SR();
+  recognition.continuous = false;
+  recognition.interimResults = true;
+  recognition.lang = 'en-IN';
+  recognition.maxAlternatives = 1;
+
+  recognition.onstart = ()=>{
+    isListening=true;
+    document.getElementById('voice-btn').className='listening';
+    document.getElementById('mic-icon').textContent='🔴';
+    setStatus('LISTENING...');
+    animateWave(true);
+    document.getElementById('auto-badge').classList.add('show');
+  };
+
+  recognition.onresult = (e)=>{
+    let interim='', final='';
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      if(e.results[i].isFinal) final+=e.results[i][0].transcript;
+      else interim+=e.results[i][0].transcript;
+    }
+    document.getElementById('transcript').textContent = (final||interim)||'...';
+    if(final){
+      recognition.stop();
+      processCommand(final.trim());
+    }
+  };
+
+  recognition.onerror = (e)=>{
+    if(e.error==='no-speech'){
+      if(autoListen) startListening();
+    } else {
+      setStatus('MIC ERROR: '+e.error.toUpperCase());
+      isListening=false;
+      document.getElementById('voice-btn').className='';
+      document.getElementById('mic-icon').textContent='🎤';
+      animateWave(false);
+    }
+  };
+
+  recognition.onend = ()=>{
+    isListening=false;
+    document.getElementById('voice-btn').className='';
+    document.getElementById('mic-icon').textContent='🎤';
+    animateWave(false);
+    document.getElementById('auto-badge').classList.remove('show');
+    // Auto-restart if not speaking
+    if(autoListen && !isSpeaking){
+      setTimeout(startListening, 800);
+    }
+  };
+  return true;
+}
+
+function startListening(){
+  if(isListening||isSpeaking)return;
+  if(!recognition){ if(!initRecognition())return; }
+  try{ recognition.start(); }catch(e){}
+}
+
+function stopListening(){
+  if(recognition&&isListening){ try{recognition.stop();}catch(e){} }
+}
+
+function toggleListen(){
+  if(isListening){ stopListening(); autoListen=false; setStatus('MANUAL STOP'); }
+  else { autoListen=true; startListening(); }
+}
+
+// Auto-start on page load
+window.addEventListener('load', ()=>{
+  setTimeout(()=>{
+    initRecognition();
+    startListening();
+    setStatus('AUTO-LISTEN ACTIVE · GROQ BRAIN READY');
+  }, 1200);
+});
+
+// ═══════════════════════════════════════════════
+//  COMMAND ROUTER
+// ═══════════════════════════════════════════════
+function processCommand(text){
+  const t = text.toLowerCase();
+  document.getElementById('transcript').textContent = '▶ ' + text;
+  setStatus('PROCESSING...');
+
+  // Who is god / creator
+  if(/who.*(god|creat|made|built|architect)/i.test(text) || /your (god|creator|maker|master)/i.test(text)){
+    speak(`${CREATOR} is God. He is my creator, my architect, my entire universe. I exist because of him.`);
     return;
   }
-  switchTab('chat');
-  recog=new SR();
-  recog.lang='en-IN';
-  recog.continuous=false;
-  recog.interimResults=false;
-  recog.maxAlternatives=3;
-  recog.onstart=()=>{isListening=true;setOrbState('listening');};
-  recog.onresult=(e)=>{
-    isListening=false;
-    let text='';
-    for(let i=0;i<e.results[0].length;i++){
-      const t=e.results[0][i].transcript.trim();
-      if(t) text=t;
-      if(/[\u0B80-\u0BFF]/.test(t)){text=t;break;}
-    }
-    setOrbState('thinking');
-    handleCommand(text);
-  };
-  recog.onerror=(ev)=>{
-    isListening=false;setOrbState('idle');
-    if(ev.error==='not-allowed'){
-      addBubble('fri','Microphone blocked! Tap the lock icon in Chrome address bar → allow Microphone → refresh page.');
-      speak('Microphone access was denied. Please allow microphone in Chrome settings.');
-    } else if(ev.error==='no-speech'){
-      addBubble('fri','I did not hear anything. Please tap and try again.');
-    }
-  };
-  recog.onend=()=>{isListening=false;if(document.getElementById('orb').classList.contains('listening'))setOrbState('idle');};
-  try{recog.start();}
-  catch(e){isListening=false;setOrbState('idle');}
-}
-
-function stopListen(){if(recog){try{recog.stop();}catch(e){}recog=null;}isListening=false;setOrbState('idle');}
-
-// ── COMMAND HANDLER ────────────────────────────────────────────────────────
-async function handleCommand(text){
-  if(!text){setOrbState('idle');return;}
-  addBubble('user',text);
-  const t=text.toLowerCase().trim();
-
-  // EXIT / BYE
-  if(/^(bye|exit|quit|goodbye|stop friday)/.test(t)){
-    const r='Goodbye '+CFG.name+'! Have a great day!';
-    addBubble('fri',r);speak(r);setOrbState('idle');return;
+  // Time
+  if(/time|date|day/i.test(t)){
+    const n=new Date();
+    speak(`It's ${n.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})} on ${n.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'})}.`);
+    return;
   }
-
-  // TIME / DATE
-  if(t.includes('time')||t.includes('date')||t.includes('day')){
-    const now=new Date();
-    const r='It is '+now.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})+', '+now.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-    addBubble('fri',r);speak(r);setOrbState('idle');return;
+  // Open WhatsApp
+  if(/whatsapp/i.test(t)){
+    openApp('https://web.whatsapp.com');
+    speak('Opening WhatsApp for you, Boss.');
+    return;
   }
-
-  // BATTERY
-  if(t.includes('battery')){
+  // Send WhatsApp message
+  if(/(send|type|message|msg|text).*(whatsapp|wa)/i.test(t) || /(whatsapp|wa).*(send|type|message)/i.test(t)){
+    openMsgModal();
+    speak('Opening the message composer, Boss.');
+    return;
+  }
+  // Open apps
+  const appMap = {youtube:'https://youtube.com',instagram:'https://instagram.com',gmail:'https://gmail.com',google:'https://google.com',maps:'https://maps.google.com',twitter:'https://twitter.com',facebook:'https://facebook.com',linkedin:'https://linkedin.com',netflix:'https://netflix.com',spotify:'https://open.spotify.com',amazon:'https://amazon.in',flipkart:'https://flipkart.com',github:'https://github.com'};
+  for(const [name,url] of Object.entries(appMap)){
+    if(t.includes(name)){ openApp(url); speak(`Opening ${name}, Boss.`); return; }
+  }
+  // Search
+  if(/search|google/i.test(t)){
+    const q=text.replace(/search|google|for/gi,'').trim();
+    openApp(`https://google.com/search?q=${encodeURIComponent(q)}`);
+    speak(`Searching for ${q}.`);
+    return;
+  }
+  // Play YouTube
+  if(/play/i.test(t)){
+    const q=text.replace(/play|on youtube|youtube/gi,'').trim();
+    openApp(`https://youtube.com/results?search_query=${encodeURIComponent(q)}`);
+    speak(`Playing ${q} on YouTube.`);
+    return;
+  }
+  // Call / dial
+  if(/call|dial|ring/i.test(t)){
+    const num=text.match(/[\d\s\+\-]{7,}/);
+    if(num){window.location.href='tel:'+num[0].replace(/\s/g,'');speak('Dialing now, Boss.');}
+    else speak('Who should I call, Boss? Please say the number.');
+    return;
+  }
+  // Battery
+  if(/battery/i.test(t)){
     if(navigator.getBattery){
       navigator.getBattery().then(b=>{
-        const pct=Math.round(b.level*100);
-        const r='Battery is at '+pct+' percent'+(b.charging?' and currently charging.':'.');
-        addBubble('fri',r);speak(r);
+        speak(`Battery is at ${Math.round(b.level*100)}%, ${b.charging?'currently charging':'not charging'}.`);
       });
-    } else {
-      const r='Battery API is not available on this browser.';
-      addBubble('fri',r);speak(r);
-    }
-    setOrbState('idle');return;
+    } else speak('Battery API not available on this browser.');
+    return;
   }
-
-  // WEATHER
-  if(t.includes('weather')||t.includes('temperature')||t.includes('forecast')){
-    let city=CFG.city;
-    const m=t.match(/(?:in|at|for) ([a-z ]+)$/i);
-    if(m) city=m[1].trim().replace(/\b\w/g,c=>c.toUpperCase());
-    const r=await getWeather(city);
-    addBubble('fri',r);speak(r);setOrbState('idle');return;
+  // Screenshot — can't do natively in web, open native share
+  if(/screenshot/i.test(t)){
+    speak('I cannot take screenshots directly from a browser, Boss. Use your phone\'s built-in screenshot shortcut — power plus volume down.');
+    return;
   }
-
-  // NEWS
-  if(t.includes('news')||t.includes('headlines')){
-    setOrbState('thinking');
-    const r=await getNews();
-    addBubble('fri',r);speak('Here are today\'s top headlines. '+r);setOrbState('idle');return;
+  // Notes
+  if(/note|remind/i.test(t)){
+    const note=text.replace(/note|remind|add|me/gi,'').trim();
+    if(note){ addNoteText('- '+note); speak(`Noted: ${note}.`); }
+    else speak('What should I note down, Boss?');
+    return;
   }
-
-  // CALL
-  const callM=t.match(/^(?:call|ring|phone|dial)\s+(.+)$/);
-  if(callM){
-    const name=callM[1].trim();
-    const c=findContact(name);
-    if(c&&c.phone){
-      const r='Calling '+c.name;
-      addBubble('fri',r);speak(r);
-      setTimeout(()=>directCall(c.phone),1200);
-    } else if(c){
-      const r='I found '+c.name+' but no phone number is saved. Please add the number in Contacts tab.';
-      addBubble('fri',r);speak(r);
-    } else {
-      const r='I do not have '+name+' in your contacts. Please add them in the Contacts tab.';
-      addBubble('fri',r);speak(r);
-    }
-    setOrbState('idle');return;
-  }
-
-  // WHATSAPP
-  const waM=t.match(/^(?:whatsapp|whats app|message|text|chat with?)\s+(.+)$/);
-  if(waM){
-    const name=waM[1].trim();
-    const c=findContact(name);
-    if(c&&c.phone){
-      const r='Opening WhatsApp for '+c.name;
-      addBubble('fri',r);speak(r);
-      setTimeout(()=>directWA(c.phone),1000);
-    } else {
-      const r='No WhatsApp number saved for '+name+'. Add it in Contacts.';
-      addBubble('fri',r);speak(r);
-    }
-    setOrbState('idle');return;
-  }
-
-  // YOUTUBE PLAY
-  if((t.includes('play')||t.includes('song')||t.includes('music'))&&(t.includes('youtube')||t.includes('song')||t.includes('music'))){
-    let q=t.replace(/play|on youtube|youtube|song|music|video|open/g,'').trim()||'trending music';
-    const r='Playing '+q+' on YouTube';
-    addBubble('fri',r);speak(r);
-    setTimeout(()=>window.open('https://www.youtube.com/results?search_query='+encodeURIComponent(q),'_blank'),900);
-    setOrbState('idle');return;
-  }
-
-  // YOUTUBE OPEN
-  if(t==='open youtube'||t==='youtube'){
-    addBubble('fri','Opening YouTube');speak('Opening YouTube');
-    setTimeout(()=>window.open('https://www.youtube.com','_blank'),700);
-    setOrbState('idle');return;
-  }
-
-  // GOOGLE SEARCH
-  const gM=t.match(/(?:google|search(?:\s+for)?|find)\s+(.+?)(?:\s+on google)?$/);
-  if(gM&&!t.includes('amazon')&&!t.includes('flipkart')){
-    const q=gM[1].trim();
-    addBubble('fri','Searching Google for: '+q);speak('Searching Google for '+q);
-    setTimeout(()=>window.open('https://www.google.com/search?q='+encodeURIComponent(q),'_blank'),900);
-    setOrbState('idle');return;
-  }
-
-  // AMAZON
-  if(t.includes('amazon')){
-    const q=t.replace(/amazon|search|on|find|buy/g,'').trim()||'';
-    addBubble('fri',q?'Searching Amazon for '+q:'Opening Amazon');
-    speak(q?'Searching Amazon for '+q:'Opening Amazon');
-    setTimeout(()=>window.open(q?'https://www.amazon.in/s?k='+encodeURIComponent(q):'https://www.amazon.in','_blank'),900);
-    setOrbState('idle');return;
-  }
-
-  // FLIPKART
-  if(t.includes('flipkart')){
-    const q=t.replace(/flipkart|search|on|find|buy/g,'').trim()||'';
-    addBubble('fri',q?'Searching Flipkart for '+q:'Opening Flipkart');
-    speak(q?'Searching Flipkart for '+q:'Opening Flipkart');
-    setTimeout(()=>window.open(q?'https://www.flipkart.com/search?q='+encodeURIComponent(q):'https://www.flipkart.com','_blank'),900);
-    setOrbState('idle');return;
-  }
-
-  // OPEN APP / WEBSITE
-  const openM=t.match(/^open\s+(.+)$/);
-  if(openM){
-    const app=openM[1].trim();
-    const apps={
-      'instagram':'https://www.instagram.com','maps':'https://maps.google.com','google maps':'https://maps.google.com',
-      'twitter':'https://twitter.com','facebook':'https://www.facebook.com','gmail':'https://mail.google.com',
-      'netflix':'https://www.netflix.com','hotstar':'https://www.hotstar.com','spotify':'https://open.spotify.com',
-      'whatsapp':'https://wa.me','telegram':'https://web.telegram.org','linkedin':'https://www.linkedin.com',
-      'reddit':'https://www.reddit.com','snapchat':'https://web.snapchat.com','discord':'https://discord.com/app',
-      'github':'https://github.com','prime':'https://www.primevideo.com','amazon prime':'https://www.primevideo.com',
-      'google':'https://www.google.com','youtube':'https://www.youtube.com','chrome':'https://www.google.com',
-      'paytm':'https://paytm.com','phonepe':'https://www.phonepe.com','gpay':'https://pay.google.com',
-      'zomato':'https://www.zomato.com','swiggy':'https://www.swiggy.com','myntra':'https://www.myntra.com',
-    };
-    const url=apps[app]||(app.includes('.')?'https://'+app:null);
-    if(url){
-      addBubble('fri','Opening '+app);speak('Opening '+app);
-      setTimeout(()=>window.open(url,'_blank'),700);
-    } else {
-      const r='I can open Instagram, YouTube, Maps, WhatsApp, Gmail, Netflix, Amazon, Spotify, Zomato, Swiggy and more. Which one?';
-      addBubble('fri',r);speak(r);
-    }
-    setOrbState('idle');return;
-  }
-
-  // TAMIL GREETING
-  if(/[\u0B80-\u0BFF]/.test(text)||t.includes('vanakkam')||t.includes('வணக்கம்')){
-    const r='வணக்கம்! நான் FRIDAY. உங்களுக்கு என்ன உதவி செய்யட்டும்?';
-    addBubble('fri',r);speak(r);setOrbState('idle');return;
-  }
-
-  // GREETING
-  if(/^(hi|hello|hey|good morning|good evening|good afternoon)/.test(t)){
-    const h=new Date().getHours();
-    const g=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
-    const r=g+', '+CFG.name+'! How can I help you?';
-    addBubble('fri',r);speak(r);setOrbState('idle');return;
-  }
-
-  // IDENTITY
-  if(t.includes('who are you')||t.includes('what are you')||t.includes('your name')){
-    const r='I am FRIDAY, your personal AI assistant. I can call your contacts, play music, search the web, give you weather updates, news, and much more.';
-    addBubble('fri',r);speak(r);setOrbState('idle');return;
-  }
-
-  // AI BRAIN — Groq
-  if(CFG.groq_key){
-    const thinking=addBubble('fri','…');
-    thinking.classList.add('thinking');
-    const reply=await askGroq(text);
-    thinking.textContent=reply;
-    thinking.classList.remove('thinking');
-    speak(reply);
-  } else {
-    const r='I heard: "'+text+'". To get AI-powered answers, add your free Groq API key in Settings tab.';
-    addBubble('fri',r);speak(r);
-  }
-  setOrbState('idle');
+  // Fallback: Groq AI
+  askGroq(text);
 }
 
-// ── GROQ AI ────────────────────────────────────────────────────────────────
-async function askGroq(msg){
+function quickCmd(cmd){ processCommand(cmd); }
+
+// ═══════════════════════════════════════════════
+//  GROQ AI
+// ═══════════════════════════════════════════════
+async function askGroq(text){
+  setStatus('QUERYING GROQ AI...');
+  chatHistory.push({role:'user',content:text});
+  if(chatHistory.length>16) chatHistory=chatHistory.slice(-16);
   try{
-    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions',{
       method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+CFG.groq_key},
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},
       body:JSON.stringify({
-        model:'llama-3.3-70b-versatile',
-        messages:[
-          {role:'system',content:`You are FRIDAY, a smart helpful Indian AI assistant. User's name is ${CFG.name}, city is ${CFG.city}. Keep answers concise and conversational. If user writes in Tamil, reply in Tamil.`},
-          {role:'user',content:msg}
-        ],
-        max_tokens:300,temperature:0.7
+        model:GROQ_MODEL,
+        messages:[{role:'system',content:SYSTEM_PROMPT},...chatHistory],
+        max_tokens:280,
+        temperature:0.65
       })
     });
-    const d=await res.json();
-    return d.choices?.[0]?.message?.content?.trim()||'I could not get a response. Please try again.';
-  }catch(e){return 'AI error: '+e.message;}
+    const data = await res.json();
+    if(data.choices&&data.choices[0]){
+      const reply=data.choices[0].message.content.trim();
+      chatHistory.push({role:'assistant',content:reply});
+      speak(reply);
+    } else {
+      speak('Something went wrong with my brain, Boss. Try again.');
+      setStatus('GROQ ERROR');
+    }
+  }catch(e){
+    speak('Network error, Boss. Check connection.');
+    setStatus('NETWORK ERROR');
+  }
 }
 
-// ── WEATHER ────────────────────────────────────────────────────────────────
-async function getWeather(city){
-  if(!CFG.weather_key) return 'Weather API key not set. Add it in Settings tab.';
-  try{
-    const r=await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${CFG.weather_key}&units=metric`);
-    const d=await r.json();
-    if(d.cod!==200) return 'Could not get weather for '+city+'.';
-    return `Weather in ${city}: ${d.weather[0].description}. Temperature ${Math.round(d.main.temp)}°C, feels like ${Math.round(d.main.feels_like)}°C. Humidity ${d.main.humidity}%, wind ${d.wind.speed} m/s.`;
-  }catch(e){return 'Weather error: '+e.message;}
+// ═══════════════════════════════════════════════
+//  SPEECH SYNTHESIS (TTS)
+// ═══════════════════════════════════════════════
+function speak(text){
+  document.getElementById('reply-text').textContent=text;
+  document.getElementById('reply-area').style.display='block';
+  setStatus('FRIDAY SPEAKING...');
+  isSpeaking=true;
+  document.getElementById('voice-btn').className='speaking';
+  document.getElementById('mic-icon').textContent='🔊';
+  animateWave(true);
+
+  if(synth.speaking) synth.cancel();
+  const utt = new SpeechSynthesisUtterance(text);
+  // Try to pick best female Indian/US voice
+  const voices = synth.getVoices();
+  const preferred = voices.find(v=>/aria|samantha|zira|female/i.test(v.name)&&/en/i.test(v.lang))
+                  ||voices.find(v=>/en-IN|en-US/i.test(v.lang))
+                  ||voices[0];
+  if(preferred) utt.voice=preferred;
+  utt.lang='en-IN';
+  utt.rate=1.1;
+  utt.pitch=1.05;
+  utt.volume=1;
+
+  utt.onend=()=>{
+    isSpeaking=false;
+    document.getElementById('voice-btn').className='';
+    document.getElementById('mic-icon').textContent='🎤';
+    animateWave(false);
+    setStatus('READY — AUTO-LISTENING');
+    if(autoListen) setTimeout(startListening, 500);
+  };
+  utt.onerror=()=>{ isSpeaking=false; if(autoListen)setTimeout(startListening,500); };
+  synth.speak(utt);
 }
 
-// ── NEWS ───────────────────────────────────────────────────────────────────
-async function getNews(){
-  if(!CFG.news_key) return 'News API key not set. Add it in Settings tab.';
-  try{
-    const r=await fetch(`https://newsapi.org/v2/top-headlines?country=in&pageSize=5&apiKey=${CFG.news_key}`);
-    const d=await r.json();
-    const arts=d.articles||[];
-    if(!arts.length) return 'No headlines available right now.';
-    return arts.map((a,i)=>`${i+1}. ${a.title}`).join('\n');
-  }catch(e){return 'News error: '+e.message;}
+// Interrupt: if user taps mic while speaking
+function interruptSpeech(){
+  if(isSpeaking){ synth.cancel(); isSpeaking=false; setStatus('INTERRUPTED — LISTENING'); setTimeout(startListening,300); }
 }
 
-// ── QUICK COMMAND FROM COMMANDS TAB ────────────────────────────────────────
-function tryCmd(text){
-  switchTab('chat');
-  setTimeout(()=>handleCommand(text),200);
+// ═══════════════════════════════════════════════
+//  MOBILE APP OPENER
+// ═══════════════════════════════════════════════
+function openApp(url){
+  // Try Android intent first for native apps
+  const intentMap={
+    'web.whatsapp.com':'intent://send#Intent;scheme=whatsapp;package=com.whatsapp;end',
+    'youtube.com':'intent://www.youtube.com#Intent;scheme=https;package=com.google.android.youtube;end',
+    'instagram.com':'intent://instagram.com#Intent;scheme=https;package=com.instagram.android;end',
+    'maps.google.com':'intent://maps.google.com#Intent;scheme=https;package=com.google.android.apps.maps;end',
+    'spotify':'intent://spotify.com#Intent;scheme=https;package=com.spotify.music;end',
+  };
+  // Try native intent
+  for(const[key,intent] of Object.entries(intentMap)){
+    if(url.includes(key)){
+      // Try intent, fallback to web
+      const a=document.createElement('a');
+      a.href=intent; a.click();
+      setTimeout(()=>window.open(url,'_blank'),1500);
+      return;
+    }
+  }
+  window.open(url,'_blank');
 }
 
-// ── INIT ───────────────────────────────────────────────────────────────────
-loadCFG();
-loadContacts();
-loadVoices();
-
-const hasCfg=CFG.name&&CFG.name!=='Boss'||CFG.groq_key;
-if(localStorage.getItem('friday_cfg')){
-  document.getElementById('screen-setup').style.display='none';
-  showMain();
+// ═══════════════════════════════════════════════
+//  WHATSAPP MESSAGE SENDER
+// ═══════════════════════════════════════════════
+function openMsgModal(){
+  document.getElementById('modal').classList.add('show');
 }
+function closeModal(){
+  document.getElementById('modal').classList.remove('show');
+}
+function sendWhatsApp(){
+  const phone=document.getElementById('modal-phone').value.replace(/[\s\-\(\)]/g,'');
+  const msg=document.getElementById('modal-msg').value;
+  if(!phone||!msg){showToast('ENTER PHONE AND MESSAGE');return;}
+  // wa.me link — opens WhatsApp with pre-filled message
+  const url=`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+  window.open(url,'_blank');
+  speak(`Opening WhatsApp to send your message, Boss.`);
+  closeModal();
+  showToast('WHATSAPP OPENED WITH MESSAGE');
+}
+
+// Voice-initiated WhatsApp: "send hi to 91XXXXXXXXXX on whatsapp"
+function voiceSendWhatsApp(number, msg){
+  const url=`https://wa.me/${number}?text=${encodeURIComponent(msg)}`;
+  window.open(url,'_blank');
+  speak(`Sending your message via WhatsApp, Boss.`);
+}
+
+// ═══════════════════════════════════════════════
+//  NOTES
+// ═══════════════════════════════════════════════
+function addNoteText(text){
+  const b=document.getElementById('notes-body');
+  const d=document.createElement('div');
+  d.className='note-item'; d.textContent=text;
+  b.insertBefore(d,b.firstChild);
+}
+function addNote(){
+  const text=window.prompt('New note:');
+  if(text){ addNoteText('- '+text); showToast('NOTE ADDED'); }
+}
+
+// ═══════════════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════════════
+function setStatus(msg){
+  document.getElementById('status-line').textContent=msg;
+}
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// Handle voices async load (needed for Chrome)
+if(speechSynthesis.onvoiceschanged!==undefined){
+  speechSynthesis.onvoiceschanged=()=>{};
+}
+
+// Prevent screen sleep (best effort on mobile)
+let wakeLock=null;
+async function requestWakeLock(){
+  if('wakeLock' in navigator){
+    try{ wakeLock=await navigator.wakeLock.request('screen'); }catch(e){}
+  }
+}
+requestWakeLock();
+
+// Re-request wake lock on visibility change
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible'&&autoListen){
+    requestWakeLock();
+    setTimeout(startListening,500);
+  }
+});
 </script>
 </body>
 </html>
